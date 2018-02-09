@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen.docs;
+package org.ballerinalang.kubegen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.fabric8.kubernetes.api.model.Service;
@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- * Main class to generate a ballerina documentation.
+ * Main class to generate a ballerina kubernetes.
  */
 public class BallerinaKubeGenerator {
 
@@ -74,7 +74,7 @@ public class BallerinaKubeGenerator {
         out.println("kuberina: Kubernetes artifact generation for sources - " + Arrays.toString(sources));
         for (String source : sources) {
             try {
-                Map<String, BLangPackage> docsMap;
+                Map<String, BLangPackage> packgeMap;
 
                 if (source.endsWith(".bal")) {
                     Path sourceFilePath = Paths.get(source);
@@ -88,12 +88,12 @@ public class BallerinaKubeGenerator {
                     if (parentDir == null) {
                         parentDir = Paths.get(".");
                     }
-                    docsMap = generatePackageKubernetesFromBallerina(parentDir.toString(), fileName);
+                    packgeMap = generatePackageKubernetesFromBallerina(parentDir.toString(), fileName);
                 } else {
                     Path dirPath = Paths.get(source);
-                    docsMap = generatePackageKubernetesFromBallerina(dirPath.toString(), dirPath);
+                    packgeMap = generatePackageKubernetesFromBallerina(dirPath.toString(), dirPath);
                 }
-                if (docsMap.size() == 0) {
+                if (packgeMap.size() == 0) {
                     out.println("kuberina: no package definitions found!");
                     return;
                 }
@@ -101,7 +101,7 @@ public class BallerinaKubeGenerator {
                 String userDir = System.getProperty("user.dir");
                 // If output directory is empty
                 if (output == null) {
-                    output = System.getProperty(BallerinaKubernetesConstants.HTML_OUTPUT_PATH_KEY, userDir +
+                    output = System.getProperty(KubeConstants.HTML_OUTPUT_PATH_KEY, userDir +
                             File.separator + "kube-artifacts" + File.separator);
                 }
 
@@ -109,7 +109,7 @@ public class BallerinaKubeGenerator {
                 Files.createDirectories(Paths.get(output));
 
                 // Sort packages by package path
-                List<BLangPackage> packageList = new ArrayList<>(docsMap.values());
+                List<BLangPackage> packageList = new ArrayList<>(packgeMap.values());
                 packageList.sort(Comparator.comparing(pkg -> pkg.getPackageDeclaration().toString()));
 
                 //Iterate over the packages to generate the kubernetes definitions
@@ -133,7 +133,7 @@ public class BallerinaKubeGenerator {
         out.println("Generate service definition for " + bLangService.getName());
         List<BLangAnnotationAttachment> annotationAttachments = bLangService.getAnnotationAttachments();
         for (BLangAnnotationAttachment annotationAttachment : annotationAttachments) {
-            if (annotationAttachment.annotationSymbol.toString().equals(BallerinaKubernetesConstants
+            if (annotationAttachment.annotationSymbol.toString().equals(KubeConstants
                     .ANNOTATION_SYMBOL_NAME)) {
                 out.println(annotationAttachment.annotationSymbol + " " + annotationAttachment.getAttributes());
                 Service service = new ServiceBuilder()

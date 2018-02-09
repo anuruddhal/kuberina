@@ -21,15 +21,15 @@ package org.ballerinalang.kubegen.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import org.ballerinalang.kubegen.docs.BallerinaKubeGenerator;
-import org.ballerinalang.kubegen.docs.BallerinaKubernetesConstants;
+import org.ballerinalang.kubegen.BallerinaKubeGenerator;
+import org.ballerinalang.kubegen.KubeConstants;
 import org.ballerinalang.launcher.BLauncherCmd;
 
 import java.io.PrintStream;
 import java.util.List;
 
 /**
- * kube command for ballerina which generates documentation for Ballerina packages.
+ * kube command for ballerina which generates kubernetes for Ballerina packages.
  */
 @Parameters(commandNames = "kube", commandDescription = "generate kubernetes artifacts")
 public class BallerinaKubeCmd implements BLauncherCmd {
@@ -69,7 +69,7 @@ public class BallerinaKubeCmd implements BLauncherCmd {
         }
 
         if (debugEnabled) {
-            System.setProperty(BallerinaKubernetesConstants.ENABLE_DEBUG_LOGS, "true");
+            System.setProperty(KubeConstants.ENABLE_DEBUG_LOGS, "true");
         }
 
         String[] sources = argList.toArray(new String[argList.size()]);
@@ -83,7 +83,7 @@ public class BallerinaKubeCmd implements BLauncherCmd {
 
     @Override
     public void printLongDesc(StringBuilder out) {
-        out.append("Generates the Kubernetes artifacts of give Ballerina programs." + System.lineSeparator());
+        out.append("Generates the Kubernetes artifacts of given Ballerina programs." + System.lineSeparator());
         out.append(System.lineSeparator());
     }
 

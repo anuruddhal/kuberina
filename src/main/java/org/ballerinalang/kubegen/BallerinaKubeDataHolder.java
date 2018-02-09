@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen.docs;
+package org.ballerinalang.kubegen;
 
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 
