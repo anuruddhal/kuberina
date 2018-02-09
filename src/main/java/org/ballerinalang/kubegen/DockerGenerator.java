@@ -29,9 +29,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.ballerinalang.kubegen.models.DockerAnnotation;
-import org.ballerinalang.kubegen.utils.KuberinaUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Path;
@@ -47,27 +45,28 @@ public class DockerGenerator {
     private static final String ENV_SVC_MODE = "SVC_MODE";
     private static final String LOCAL_DOCKER_DAEMON_SOCKET = "unix:///var/run/docker.sock";
     private static final String ENV_FILE_MODE = "FILE_MODE";
+    private static final String DOCKER_VELOCITY_TEMPLATE = "templates/Dockerfile.template";
+    private static final CountDownLatch buildDone = new CountDownLatch(1);
 
     /**
      * Generate Dockerfile based on annotations using velocity template.
      *
      * @param dockerAnnotation {@link DockerAnnotation} object
      */
-    public void generate(DockerAnnotation dockerAnnotation) throws IOException {
+    public String generate(DockerAnnotation dockerAnnotation) {
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         velocityEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
         velocityEngine.init();
-        Template template = velocityEngine.getTemplate("templates/Dockerfile.template");
+        Template template = velocityEngine.getTemplate(DOCKER_VELOCITY_TEMPLATE);
         VelocityContext context = new VelocityContext();
         context.put("fileName", "example.balx");
-        context.put("isService", true);
+        context.put("isService", false);
+        context.put("ports", dockerAnnotation.getPorts());
 
         StringWriter writer = new StringWriter();
         template.merge(context, writer);
-
-        KuberinaUtils.writeToFile(writer.toString(), new File("target/Dockerfile").getPath());
-
+        return writer.toString();
     }
 
     public void buildImage(String dockerEnv, String imageName, Path tmpDir, boolean isService)
@@ -76,7 +75,6 @@ public class DockerGenerator {
         String buildArgs = "{\"" + ENV_SVC_MODE + "\":\"" + String.valueOf(isService) + "\", " +
                 "\"BUILD_DATE\":\"" + timestamp + "\"}";
         DockerClient client = getDockerClient(dockerEnv);
-        final CountDownLatch buildDone = new CountDownLatch(1);
         OutputHandle buildHandle = client.image()
                 .build()
                 .withRepositoryName(imageName)
@@ -89,30 +87,6 @@ public class DockerGenerator {
         buildDone.await();
         buildHandle.close();
         client.close();
-    }
-
-    /**
-     * An {@link EventListener} implementation to listen to Docker build events.
-     */
-    private static class DockerBuilderEventListener implements EventListener {
-
-        @Override
-        public void onSuccess(String successEvent){
-        }
-
-        @Override
-        public void onError(String errorEvent) {
-
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-
-        }
-
-        @Override
-        public void onEvent(String ignore) {
-        }
     }
 
     /**
@@ -134,5 +108,30 @@ public class DockerGenerator {
 
         client = new io.fabric8.docker.client.DefaultDockerClient(dockerClientConfig);
         return client;
+    }
+
+    /**
+     * An {@link EventListener} implementation to listen to Docker build events.
+     */
+    private static class DockerBuilderEventListener implements EventListener {
+
+        @Override
+        public void onSuccess(String successEvent) {
+            buildDone.countDown();
+        }
+
+        @Override
+        public void onError(String errorEvent) {
+            buildDone.countDown();
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            buildDone.countDown();
+        }
+
+        @Override
+        public void onEvent(String ignore) {
+        }
     }
 }

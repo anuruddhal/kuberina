@@ -18,7 +18,7 @@
 
 package org.ballerinalang.kubegen.utils;
 
-import org.ballerinalang.kubegen.KubeConstants;
+import org.ballerinalang.kubegen.KuberinaConstants;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -38,7 +38,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class KuberinaUtils {
 
     private static final boolean debugEnabled = "true".equals(System.getProperty(
-            KubeConstants.ENABLE_DEBUG_LOGS));
+            KuberinaConstants.ENABLE_DEBUG_LOGS));
     private static final PrintStream out = System.out;
 
     public static void writeToFile(String context, String targetFilePath) throws IOException {

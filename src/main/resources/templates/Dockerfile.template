@@ -15,8 +15,9 @@
 # -----------------------------------------------------------------------
 
 FROM Ballerina-base:latest
-MAINTAINER Ballerina Maintainers "dev@ballerina.io”
+MAINTAINER Ballerina Maintainers "dev@ballerina.io"
 
 COPY ../../${fileName} /home/ballerina/
-EXPOSE 9091
+EXPOSE #foreach( $port in $ports ) $port #end
+
 CMD exec ballerina run  #if(${isService}) -s #end ${fileName}

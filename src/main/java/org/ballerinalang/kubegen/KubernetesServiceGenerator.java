@@ -42,11 +42,11 @@ public class KubernetesServiceGenerator {
                 .endMetadata()
                 .withNewSpec()
                 .addNewPort()
-                .withProtocol(KubeConstants.KUBERNETES_SVC_PROTOCOL)
+                .withProtocol(KuberinaConstants.KUBERNETES_SVC_PROTOCOL)
                 .withPort(serviceAnnotation.getPort())
                 .withNewTargetPort(serviceAnnotation.getPort())
                 .endPort()
-                .addToSelector(KubeConstants.KUBERNETES_SELECTOR_KEY, serviceAnnotation.getSelector())
+                .addToSelector(KuberinaConstants.KUBERNETES_SELECTOR_KEY, serviceAnnotation.getSelector())
                 .withType(serviceAnnotation.getServiceType())
                 .endSpec()
                 .build();

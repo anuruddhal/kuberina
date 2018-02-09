@@ -22,7 +22,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.ballerinalang.kubegen.BallerinaKubeGenerator;
-import org.ballerinalang.kubegen.KubeConstants;
+import org.ballerinalang.kubegen.KuberinaConstants;
 import org.ballerinalang.launcher.BLauncherCmd;
 
 import java.io.PrintStream;
@@ -69,7 +69,7 @@ public class BallerinaKubeCmd implements BLauncherCmd {
         }
 
         if (debugEnabled) {
-            System.setProperty(KubeConstants.ENABLE_DEBUG_LOGS, "true");
+            System.setProperty(KuberinaConstants.ENABLE_DEBUG_LOGS, "true");
         }
 
         String[] sources = argList.toArray(new String[argList.size()]);

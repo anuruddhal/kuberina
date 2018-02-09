@@ -21,7 +21,7 @@ package org.ballerinalang.kubegen;
 /**
  * Constants used in kuberina.
  */
-public class KubeConstants {
+public class KuberinaConstants {
     public static final String ANNOTATION_SYMBOL_NAME = "ballerina.cloud.kubernetes:configuration";
     public static final String HTML_OUTPUT_PATH_KEY = "kube.output.path";
     public static final String ENABLE_DEBUG_LOGS = "debugKuberina";

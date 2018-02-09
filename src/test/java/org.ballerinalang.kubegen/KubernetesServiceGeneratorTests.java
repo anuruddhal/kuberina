@@ -48,7 +48,7 @@ public class KubernetesServiceGeneratorTests {
         serviceAnnotation.setServiceType("NodePort");
         serviceAnnotation.setSelector("MyAPP");
         Map<String, String> labels = new HashMap<>();
-        labels.put(KubeConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
+        labels.put(KuberinaConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
         serviceAnnotation.setLabels(labels);
         KubernetesServiceGenerator kubernetesServiceGenerator = new KubernetesServiceGenerator();
         Service service = kubernetesServiceGenerator.generate(serviceAnnotation);

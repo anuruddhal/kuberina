@@ -18,14 +18,20 @@
 
 package org.ballerinalang.kubegen;
 
+import org.ballerinalang.kubegen.models.DockerAnnotation;
+import org.ballerinalang.kubegen.utils.KuberinaUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Docker generator tests
+ * Docker generator tests.
  */
 public class DockerGeneratorTests {
 
@@ -33,6 +39,17 @@ public class DockerGeneratorTests {
 
     @Test
     public void testServiceGenerate() throws IOException {
-        new DockerGenerator().generate(null);
+        List<Integer> ports = new ArrayList<>();
+        ports.add(9090);
+        ports.add(9091);
+        ports.add(9092);
+        DockerAnnotation dockerAnnotation = new DockerAnnotation();
+        dockerAnnotation.setPorts(ports);
+        String dockerfileContent = new DockerGenerator().generate(dockerAnnotation);
+        File dockerfile = new File("target/Dockerfile");
+        KuberinaUtils.writeToFile(dockerfileContent, dockerfile.getPath());
+        log.info("Dockerfile Content:\n" + dockerfileContent);
+        Assert.assertTrue(dockerfile.exists());
+        dockerfile.deleteOnExit();
     }
 }

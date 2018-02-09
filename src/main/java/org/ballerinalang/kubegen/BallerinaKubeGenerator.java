@@ -101,7 +101,7 @@ public class BallerinaKubeGenerator {
                 String userDir = System.getProperty("user.dir");
                 // If output directory is empty
                 if (output == null) {
-                    output = System.getProperty(KubeConstants.HTML_OUTPUT_PATH_KEY, userDir +
+                    output = System.getProperty(KuberinaConstants.HTML_OUTPUT_PATH_KEY, userDir +
                             File.separator + "kube-artifacts" + File.separator);
                 }
 
@@ -133,7 +133,7 @@ public class BallerinaKubeGenerator {
         out.println("Generate service definition for " + bLangService.getName());
         List<BLangAnnotationAttachment> annotationAttachments = bLangService.getAnnotationAttachments();
         for (BLangAnnotationAttachment annotationAttachment : annotationAttachments) {
-            if (annotationAttachment.annotationSymbol.toString().equals(KubeConstants
+            if (annotationAttachment.annotationSymbol.toString().equals(KuberinaConstants
                     .ANNOTATION_SYMBOL_NAME)) {
                 out.println(annotationAttachment.annotationSymbol + " " + annotationAttachment.getAttributes());
                 Service service = new ServiceBuilder()
