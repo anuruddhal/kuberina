@@ -17,6 +17,7 @@
  */
 package org.ballerinalang.kubegen.models;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,6 +33,7 @@ public class DeploymentAnnotation {
     private String imagePullPolicy;
     private String namespace;
     private String image;
+    private List<Integer> ports;
 
     public String getName() {
         return name;
@@ -103,5 +105,13 @@ public class DeploymentAnnotation {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public List<Integer> getPorts() {
+        return ports;
+    }
+
+    public void setPorts(List<Integer> ports) {
+        this.ports = ports;
     }
 }

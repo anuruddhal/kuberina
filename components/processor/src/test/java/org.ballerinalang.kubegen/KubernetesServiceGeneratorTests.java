@@ -18,15 +18,13 @@
 
 package org.ballerinalang.kubegen;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.client.internal.SerializationUtils;
+import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.kubegen.models.ServiceAnnotation;
 import org.ballerinalang.kubegen.utils.KuberinaUtils;
+import org.junit.Assert;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,20 +49,19 @@ public class KubernetesServiceGeneratorTests {
         labels.put(KuberinaConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
         serviceAnnotation.setLabels(labels);
         KubernetesServiceGenerator kubernetesServiceGenerator = new KubernetesServiceGenerator();
-        Service service = kubernetesServiceGenerator.generate(serviceAnnotation);
-        Assert.assertNotNull(service);
         try {
-            String serviceYAML = SerializationUtils.dumpAsYaml(service);
-            File tempFile = File.createTempFile("temp", serviceAnnotation.getName() + ".yaml", new File
-                    ("target"));
+            String serviceYAML = kubernetesServiceGenerator.generate(serviceAnnotation);
+            Assert.assertNotNull(serviceYAML);
+
+            File tempFile = File.createTempFile("temp", serviceAnnotation.getName() + ".yaml", new File("target"));
             KuberinaUtils.writeToFile(serviceYAML, tempFile.getPath());
             log.info("Generated YAML: \n" + serviceYAML);
             Assert.assertTrue(tempFile.exists());
             tempFile.deleteOnExit();
-        } catch (JsonProcessingException e) {
-            Assert.fail("Unable to generate yaml from service", e);
         } catch (IOException e) {
-            Assert.fail("Unable to generate yaml from service", e);
+            Assert.fail("Unable to write to file");
+        } catch (ArtifactGenerationException e) {
+            Assert.fail("Unable to generate yaml from service");
         }
     }
 }

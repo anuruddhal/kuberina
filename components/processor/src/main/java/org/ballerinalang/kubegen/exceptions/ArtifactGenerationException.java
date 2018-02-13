@@ -16,23 +16,18 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen;
-
-import io.fabric8.kubernetes.api.model.extensions.Deployment;
-import org.ballerinalang.kubegen.models.DeploymentAnnotation;
+package org.ballerinalang.kubegen.exceptions;
 
 /**
- * Generates kubernetes deployment from annotations.
+ * Custom exception for kubernetes artifact generation errors.
  */
-public class KubernetesDeploymentGenerator {
+public class ArtifactGenerationException extends Exception {
 
-    /**
-     * Generate kubernetes deployment definition from annotation.
-     *
-     * @param deploymentAnnotation {@link DeploymentAnnotation} object
-     * @return Generated kubernetes @{@link Deployment} object
-     */
-    public Deployment generate(DeploymentAnnotation deploymentAnnotation) {
-        return null;
+    public ArtifactGenerationException(String msg) {
+        super(msg);
+    }
+
+    public ArtifactGenerationException(String msg, Throwable e) {
+        super(msg, e);
     }
 }

@@ -44,7 +44,6 @@ public class DockerGenerator {
 
     private static final String ENV_SVC_MODE = "SVC_MODE";
     private static final String LOCAL_DOCKER_DAEMON_SOCKET = "unix:///var/run/docker.sock";
-    private static final String ENV_FILE_MODE = "FILE_MODE";
     private static final String DOCKER_VELOCITY_TEMPLATE = "templates/Dockerfile.template";
     private static final CountDownLatch buildDone = new CountDownLatch(1);
 
@@ -52,6 +51,7 @@ public class DockerGenerator {
      * Generate Dockerfile based on annotations using velocity template.
      *
      * @param dockerAnnotation {@link DockerAnnotation} object
+     * @return Dockerfile content as a string
      */
     public String generate(DockerAnnotation dockerAnnotation) {
         VelocityEngine velocityEngine = new VelocityEngine();
@@ -60,17 +60,18 @@ public class DockerGenerator {
         velocityEngine.init();
         Template template = velocityEngine.getTemplate(DOCKER_VELOCITY_TEMPLATE);
         VelocityContext context = new VelocityContext();
-        context.put("fileName", "example.balx");
-        context.put("isService", false);
-        context.put("ports", dockerAnnotation.getPorts());
-
+        context.put("fileName", dockerAnnotation.getBalxFileName());
+        context.put("isService", dockerAnnotation.isService());
+        if (dockerAnnotation.isService()) {
+            context.put("ports", dockerAnnotation.getPorts());
+        }
         StringWriter writer = new StringWriter();
         template.merge(context, writer);
         return writer.toString();
     }
 
-    public void buildImage(String dockerEnv, String imageName, Path tmpDir, boolean isService)
-            throws InterruptedException, IOException {
+    public void buildImage(String dockerEnv, String imageName, Path tmpDir, boolean isService) throws
+            InterruptedException, IOException {
         String timestamp = new SimpleDateFormat("yyyy-MM-dd'T'h:m:ssXX").format(new Date());
         String buildArgs = "{\"" + ENV_SVC_MODE + "\":\"" + String.valueOf(isService) + "\", " +
                 "\"BUILD_DATE\":\"" + timestamp + "\"}";
@@ -83,7 +84,6 @@ public class DockerGenerator {
                 .withBuildArgs(buildArgs)
                 .usingListener(new DockerBuilderEventListener())
                 .fromFolder(tmpDir.toString());
-
         buildDone.await();
         buildHandle.close();
         client.close();

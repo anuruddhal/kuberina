@@ -18,23 +18,28 @@
 
 package org.ballerinalang.kubegen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBuilder;
+import io.fabric8.kubernetes.client.internal.SerializationUtils;
+import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.kubegen.models.IngressAnnotation;
+
+import java.io.PrintStream;
 
 
 /**
  * Generates kubernetes ingress from annotations.
  */
 public class KubernetesIngressGenerator {
-
+    PrintStream out = System.out;
     /**
      * Generate kubernetes ingress definition from annotation.
      *
      * @param ingressAnnotation {@link IngressAnnotation} object
-     * @return Generated kubernetes {@link Ingress} object
+     * @return Generated kubernetes {@link Ingress} definition
      */
-    public Ingress generate(IngressAnnotation ingressAnnotation) {
+    public String generate(IngressAnnotation ingressAnnotation) throws ArtifactGenerationException {
         Ingress ingress = new IngressBuilder()
                 .withNewMetadata()
                 .withName(ingressAnnotation.getName())
@@ -42,6 +47,14 @@ public class KubernetesIngressGenerator {
                 .withNewSpec()
                 .endSpec()
                 .build();
-        return ingress;
+        String ingressYAML = null;
+        try {
+            ingressYAML = SerializationUtils.dumpAsYaml(ingress);
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Error while generating yaml file for ingress: " + ingressAnnotation.getName();
+            out.println(errorMessage);
+            throw new ArtifactGenerationException(errorMessage, e);
+        }
+        return ingressYAML;
     }
 }

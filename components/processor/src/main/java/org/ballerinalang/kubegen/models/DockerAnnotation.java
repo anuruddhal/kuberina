@@ -29,7 +29,9 @@ public class DockerAnnotation {
     private String tag;
     private String username;
     private String password;
+    private String balxFileName;
     private boolean push;
+    private boolean isService;
     private List<Integer> ports;
 
     public String getName() {
@@ -86,5 +88,21 @@ public class DockerAnnotation {
 
     public void setPorts(List<Integer> ports) {
         this.ports = ports;
+    }
+
+    public String getBalxFileName() {
+        return balxFileName;
+    }
+
+    public void setBalxFileName(String balxFileName) {
+        this.balxFileName = balxFileName;
+    }
+
+    public boolean isService() {
+        return isService;
+    }
+
+    public void setService(boolean service) {
+        isService = service;
     }
 }

@@ -18,9 +18,14 @@
 
 package org.ballerinalang.kubegen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.client.internal.SerializationUtils;
+import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.kubegen.models.ServiceAnnotation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -28,13 +33,15 @@ import org.ballerinalang.kubegen.models.ServiceAnnotation;
  */
 public class KubernetesServiceGenerator {
 
+    private final Logger log = LoggerFactory.getLogger(KubernetesServiceGenerator.class);
+
     /**
      * Generate kubernetes service definition from annotation.
      *
      * @param serviceAnnotation {@link ServiceAnnotation} object
-     * @return Generated kubernetes @{@link Service} object
+     * @return Generated kubernetes service yaml as a string
      */
-    public Service generate(ServiceAnnotation serviceAnnotation) {
+    public String generate(ServiceAnnotation serviceAnnotation) throws ArtifactGenerationException {
         Service service = new ServiceBuilder()
                 .withNewMetadata()
                 .withName(serviceAnnotation.getName())
@@ -50,7 +57,15 @@ public class KubernetesServiceGenerator {
                 .withType(serviceAnnotation.getServiceType())
                 .endSpec()
                 .build();
-        return service;
+        String serviceYAML = null;
+        try {
+            serviceYAML = SerializationUtils.dumpAsYaml(service);
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Error while generating yaml file for service: " + serviceAnnotation.getName();
+            log.error(errorMessage, e);
+            throw new ArtifactGenerationException(errorMessage, e);
+        }
+        return serviceYAML;
     }
 
 
