@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen.generators;
+package org.ballerinalang.artifactgen.generators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.fabric8.kubernetes.api.model.Container;
@@ -26,12 +26,11 @@ import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
-import org.ballerinalang.kubegen.KuberinaConstants;
-import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
-import org.ballerinalang.kubegen.models.DeploymentAnnotation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ballerinalang.artifactgen.ArtifactGenConstants;
+import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
+import org.ballerinalang.artifactgen.models.DeploymentAnnotation;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +39,7 @@ import java.util.List;
  */
 public class KubernetesDeploymentGenerator {
 
-    private final Logger log = LoggerFactory.getLogger(KubernetesDeploymentGenerator.class);
+    private static final PrintStream out = System.out;
 
     /**
      * Generate kubernetes deployment definition from annotation.
@@ -48,7 +47,7 @@ public class KubernetesDeploymentGenerator {
      * @param deploymentAnnotation {@link DeploymentAnnotation} object
      * @return Generated kubernetes @{@link Deployment} definition
      */
-    public String generate(DeploymentAnnotation deploymentAnnotation) throws ArtifactGenerationException {
+    public static String generate(DeploymentAnnotation deploymentAnnotation) throws ArtifactGenerationException {
         List<ContainerPort> containerPorts = null;
         if (deploymentAnnotation.getPorts() != null) {
             containerPorts = populatePorts(deploymentAnnotation.getPorts());
@@ -70,37 +69,37 @@ public class KubernetesDeploymentGenerator {
                 .endTemplate()
                 .endSpec()
                 .build();
-        String deploymentYAML = null;
+        String deploymentYAML;
         try {
             deploymentYAML = SerializationUtils.dumpWithoutRuntimeStateAsYaml(deployment);
         } catch (JsonProcessingException e) {
-            String errorMessage = "Error while generating yaml file for deployment: " + deploymentAnnotation.getName();
-            log.error(errorMessage, e);
+            String errorMessage = "Error while parsing yaml file for deployment: " + deploymentAnnotation.getName();
+            out.println(errorMessage);
             throw new ArtifactGenerationException(errorMessage, e);
         }
         return deploymentYAML;
     }
 
-    private List<ContainerPort> populatePorts(List<Integer> ports) {
+    private static List<ContainerPort> populatePorts(List<Integer> ports) {
         List<ContainerPort> containerPorts = new ArrayList<>();
         for (int port : ports) {
             ContainerPort containerPort = new ContainerPortBuilder()
                     .withContainerPort(port)
-                    .withProtocol(KuberinaConstants.KUBERNETES_SVC_PROTOCOL)
+                    .withProtocol(ArtifactGenConstants.KUBERNETES_SVC_PROTOCOL)
                     .build();
             containerPorts.add(containerPort);
         }
         return containerPorts;
     }
 
-    private Container generateContainer(DeploymentAnnotation deploymentAnnotation, List<ContainerPort> containerPorts) {
-        Container container = new ContainerBuilder()
+    private static Container generateContainer(DeploymentAnnotation deploymentAnnotation, List<ContainerPort>
+            containerPorts) {
+        return new ContainerBuilder()
                 .withName(deploymentAnnotation.getName())
                 .withImage(deploymentAnnotation.getImage())
                 .withImagePullPolicy(deploymentAnnotation.getImagePullPolicy())
                 .withPorts(containerPorts)
                 .build();
-        return container;
     }
 }
 

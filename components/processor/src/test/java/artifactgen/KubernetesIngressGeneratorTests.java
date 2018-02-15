@@ -16,12 +16,12 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen;
+package org.ballerinalang.artifactgen;
 
-import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
-import org.ballerinalang.kubegen.generators.KubernetesIngressGenerator;
-import org.ballerinalang.kubegen.models.IngressAnnotation;
-import org.ballerinalang.kubegen.utils.KuberinaUtils;
+import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
+import org.ballerinalang.artifactgen.generators.KubernetesIngressGenerator;
+import org.ballerinalang.artifactgen.models.IngressAnnotation;
+import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class KubernetesIngressGeneratorTests {
         ingressAnnotation.setIngressClass("nginx");
         ingressAnnotation.setServiceName("HelloWorldService");
         Map<String, String> labels = new HashMap<>();
-        labels.put(KuberinaConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
+        labels.put(ArtifactGenConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
         ingressAnnotation.setLabels(labels);
         KubernetesIngressGenerator kubernetesIngressGenerator = new KubernetesIngressGenerator();
         try {
@@ -58,7 +58,7 @@ public class KubernetesIngressGeneratorTests {
             File artifactLocation = new File("target/kubernetes");
             artifactLocation.mkdir();
             File tempFile = File.createTempFile("temp", ingressAnnotation.getName() + ".yaml", artifactLocation);
-            KuberinaUtils.writeToFile(ingressYaml, tempFile.getPath());
+            ArtifactGenUtils.writeToFile(ingressYaml, tempFile.getPath());
             log.info("Generated YAML: \n" + ingressYaml);
             Assert.assertTrue(tempFile.exists());
             // tempFile.deleteOnExit();

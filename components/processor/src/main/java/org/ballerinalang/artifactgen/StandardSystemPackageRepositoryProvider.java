@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen;
+package org.ballerinalang.artifactgen;
 
 import org.ballerinalang.annotation.JavaSPIService;
 import org.ballerinalang.repository.PackageRepository;

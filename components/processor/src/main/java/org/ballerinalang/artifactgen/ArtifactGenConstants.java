@@ -16,12 +16,12 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen;
+package org.ballerinalang.artifactgen;
 
 /**
  * Constants used in kuberina.
  */
-public class KuberinaConstants {
+public class ArtifactGenConstants {
     public static final String ENABLE_DEBUG_LOGS = "debugKuberina";
     public static final String KUBERNETES_SVC_PROTOCOL = "TCP";
     public static final String KUBERNETES_SELECTOR_KEY = "app";

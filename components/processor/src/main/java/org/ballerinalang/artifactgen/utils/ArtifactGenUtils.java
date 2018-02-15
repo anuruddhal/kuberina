@@ -16,9 +16,9 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen.utils;
+package org.ballerinalang.artifactgen.utils;
 
-import org.ballerinalang.kubegen.KuberinaConstants;
+import org.ballerinalang.artifactgen.ArtifactGenConstants;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -35,10 +35,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 /**
  * Util methods used for doc generation.
  */
-public class KuberinaUtils {
+public class ArtifactGenUtils {
 
     private static final boolean debugEnabled = "true".equals(System.getProperty(
-            KuberinaConstants.ENABLE_DEBUG_LOGS));
+            ArtifactGenConstants.ENABLE_DEBUG_LOGS));
     private static final PrintStream out = System.out;
 
     public static void writeToFile(String context, String targetFilePath) throws IOException {
@@ -77,7 +77,7 @@ public class KuberinaUtils {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
             Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-            if (KuberinaUtils.isDebugEnabled()) {
+            if (ArtifactGenUtils.isDebugEnabled()) {
                 out.println("File copied: " + file.toString());
             }
             return FileVisitResult.CONTINUE;

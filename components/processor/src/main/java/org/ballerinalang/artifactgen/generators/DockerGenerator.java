@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen.generators;
+package org.ballerinalang.artifactgen.generators;
 
 import io.fabric8.docker.client.Config;
 import io.fabric8.docker.client.ConfigBuilder;
@@ -28,7 +28,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.ballerinalang.kubegen.models.DockerAnnotation;
+import org.ballerinalang.artifactgen.models.DockerAnnotation;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -52,7 +52,7 @@ public class DockerGenerator {
      * @param dockerAnnotation {@link DockerAnnotation} object
      * @return Dockerfile content as a string
      */
-    public String generate(DockerAnnotation dockerAnnotation) {
+    public static String generate(DockerAnnotation dockerAnnotation) {
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         velocityEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
@@ -69,7 +69,7 @@ public class DockerGenerator {
         return writer.toString();
     }
 
-    public void buildImage(String dockerEnv, String imageName, Path tmpDir) throws
+    public static void buildImage(String dockerEnv, String imageName, Path tmpDir) throws
             InterruptedException, IOException {
 
         DockerClient client = getDockerClient(dockerEnv);
@@ -92,7 +92,7 @@ public class DockerGenerator {
      *            daemon will be created.
      * @return {@link DockerClient} object.
      */
-    private DockerClient getDockerClient(String env) {
+    private static DockerClient getDockerClient(String env) {
         DockerClient client;
         if (env == null) {
             env = LOCAL_DOCKER_DAEMON_SOCKET;

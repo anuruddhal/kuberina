@@ -16,11 +16,11 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen;
+package org.ballerinalang.artifactgen;
 
-import org.ballerinalang.kubegen.generators.DockerGenerator;
-import org.ballerinalang.kubegen.models.DockerAnnotation;
-import org.ballerinalang.kubegen.utils.KuberinaUtils;
+import org.ballerinalang.artifactgen.generators.DockerGenerator;
+import org.ballerinalang.artifactgen.models.DockerAnnotation;
+import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -49,11 +49,11 @@ public class DockerGeneratorTests {
         dockerAnnotation.setService(true);
         dockerAnnotation.setBalxFileName("example.balx");
 
-        String dockerfileContent = new DockerGenerator().generate(dockerAnnotation);
+        String dockerfileContent = DockerGenerator.generate(dockerAnnotation);
         File dockerfile = new File("target/kubernetes/docker");
         dockerfile.mkdirs();
         dockerfile = new File("target/kubernetes/docker/Dockerfile");
-        KuberinaUtils.writeToFile(dockerfileContent, dockerfile.getPath());
+        ArtifactGenUtils.writeToFile(dockerfileContent, dockerfile.getPath());
         log.info("Dockerfile Content:\n" + dockerfileContent);
         Assert.assertTrue(dockerfile.exists());
         //dockerfile.deleteOnExit();

@@ -16,12 +16,12 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen;
+package org.ballerinalang.artifactgen;
 
-import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
-import org.ballerinalang.kubegen.generators.KubernetesServiceGenerator;
-import org.ballerinalang.kubegen.models.ServiceAnnotation;
-import org.ballerinalang.kubegen.utils.KuberinaUtils;
+import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
+import org.ballerinalang.artifactgen.generators.KubernetesServiceGenerator;
+import org.ballerinalang.artifactgen.models.ServiceAnnotation;
+import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -47,7 +47,7 @@ public class KubernetesServiceGeneratorTests {
         serviceAnnotation.setServiceType("NodePort");
         serviceAnnotation.setSelector("MyAPP");
         Map<String, String> labels = new HashMap<>();
-        labels.put(KuberinaConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
+        labels.put(ArtifactGenConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
         serviceAnnotation.setLabels(labels);
         KubernetesServiceGenerator kubernetesServiceGenerator = new KubernetesServiceGenerator();
         try {
@@ -56,7 +56,7 @@ public class KubernetesServiceGeneratorTests {
             File artifactLocation = new File("target/kubernetes");
             artifactLocation.mkdir();
             File tempFile = File.createTempFile("temp", serviceAnnotation.getName() + ".yaml", artifactLocation);
-            KuberinaUtils.writeToFile(serviceYAML, tempFile.getPath());
+            ArtifactGenUtils.writeToFile(serviceYAML, tempFile.getPath());
             log.info("Generated YAML: \n" + serviceYAML);
             Assert.assertTrue(tempFile.exists());
             //tempFile.deleteOnExit();

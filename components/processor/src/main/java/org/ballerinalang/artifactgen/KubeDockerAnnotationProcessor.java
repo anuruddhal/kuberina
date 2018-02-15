@@ -1,4 +1,4 @@
-package org.ballerinalang.kubegen;
+package org.ballerinalang.artifactgen;
 
 import org.ballerinalang.annotation.AbstractAnnotationProcessor;
 import org.ballerinalang.annotation.AnnotationType;

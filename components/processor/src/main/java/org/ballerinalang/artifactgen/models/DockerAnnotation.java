@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen.models;
+package org.ballerinalang.artifactgen.models;
 
 import java.util.List;
 

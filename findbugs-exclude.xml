@@ -4,7 +4,7 @@
         <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD,BC_UNCONFIRMED_CAST,BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
     </Match>
     <Match>
-        <Package name="org.ballerinalang.kubegen.model"/>
-        <Class name="org.ballerinalang.kubegen.Generator"/>
+        <Package name="org.ballerinalang.artifactgen.model"/>
+        <Class name="org.ballerinalang.artifactgen.Generator"/>
     </Match>
 </FindBugsFilter>

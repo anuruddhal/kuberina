@@ -16,18 +16,17 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen.generators;
+package org.ballerinalang.artifactgen.generators;
 
 import io.fabric8.kubernetes.api.KubernetesHelper;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import org.ballerinalang.kubegen.KuberinaConstants;
-import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
-import org.ballerinalang.kubegen.models.ServiceAnnotation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ballerinalang.artifactgen.ArtifactGenConstants;
+import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
+import org.ballerinalang.artifactgen.models.ServiceAnnotation;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 
 /**
@@ -35,7 +34,7 @@ import java.io.IOException;
  */
 public class KubernetesServiceGenerator {
 
-    private final Logger log = LoggerFactory.getLogger(KubernetesServiceGenerator.class);
+    private static final PrintStream out = System.out;
 
     /**
      * Generate kubernetes service definition from annotation.
@@ -43,7 +42,7 @@ public class KubernetesServiceGenerator {
      * @param serviceAnnotation {@link ServiceAnnotation} object
      * @return Generated kubernetes service yaml as a string
      */
-    public String generate(ServiceAnnotation serviceAnnotation) throws ArtifactGenerationException {
+    public static String generate(ServiceAnnotation serviceAnnotation) throws ArtifactGenerationException {
         Service service = new ServiceBuilder()
                 .withNewMetadata()
                 .withName(serviceAnnotation.getName())
@@ -51,20 +50,20 @@ public class KubernetesServiceGenerator {
                 .endMetadata()
                 .withNewSpec()
                 .addNewPort()
-                .withProtocol(KuberinaConstants.KUBERNETES_SVC_PROTOCOL)
+                .withProtocol(ArtifactGenConstants.KUBERNETES_SVC_PROTOCOL)
                 .withPort(serviceAnnotation.getPort())
                 .withNewTargetPort(serviceAnnotation.getPort())
                 .endPort()
-                .addToSelector(KuberinaConstants.KUBERNETES_SELECTOR_KEY, serviceAnnotation.getSelector())
+                .addToSelector(ArtifactGenConstants.KUBERNETES_SELECTOR_KEY, serviceAnnotation.getSelector())
                 .withType(serviceAnnotation.getServiceType())
                 .endSpec()
                 .build();
-        String serviceYAML = null;
+        String serviceYAML;
         try {
             serviceYAML = KubernetesHelper.toYaml(service);
         } catch (IOException e) {
             String errorMessage = "Error while generating yaml file for service: " + serviceAnnotation.getName();
-            log.error(errorMessage, e);
+            out.println(errorMessage);
             throw new ArtifactGenerationException(errorMessage, e);
         }
         return serviceYAML;

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen.generators;
+package org.ballerinalang.artifactgen.generators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
@@ -28,9 +28,8 @@ import io.fabric8.kubernetes.api.model.extensions.IngressBuilder;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLSBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
-import org.apache.commons.lang.StringUtils;
-import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
-import org.ballerinalang.kubegen.models.IngressAnnotation;
+import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
+import org.ballerinalang.artifactgen.models.IngressAnnotation;
 
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -44,7 +43,7 @@ public class KubernetesIngressGenerator {
     private static final String INGRESS_CLASS = "kubernetes.io/ingress.class";
     private static final String INGRESS_SSL_PASS_THROUGH = "nginx.ingress.kubernetes.io/ssl-passthrough";
     private static final String INGRESS_REWRITE_TARGET = "nginx.ingress.kubernetes.io/rewrite-target";
-    PrintStream out = System.out;
+    private static final PrintStream out = System.out;
 
     /**
      * Generate kubernetes ingress definition from annotation.
@@ -52,7 +51,7 @@ public class KubernetesIngressGenerator {
      * @param ingressAnnotation {@link IngressAnnotation} object
      * @return Generated kubernetes {@link Ingress} definition
      */
-    public String generate(IngressAnnotation ingressAnnotation) throws ArtifactGenerationException {
+    public static String generate(IngressAnnotation ingressAnnotation) throws ArtifactGenerationException {
         //generate ingress backend
         IngressBackend ingressBackend = new IngressBackendBuilder()
                 .withServiceName(ingressAnnotation.getServiceName())
@@ -74,7 +73,7 @@ public class KubernetesIngressGenerator {
         Map<String, String> annotationMap = new HashMap<>();
         annotationMap.put(INGRESS_CLASS, ingressAnnotation.getIngressClass());
         annotationMap.put(INGRESS_SSL_PASS_THROUGH, "true");
-        if (StringUtils.isNotEmpty(ingressAnnotation.getTargetPath())) {
+        if (ingressAnnotation.getTargetPath() != null) {
             annotationMap.put(INGRESS_REWRITE_TARGET, ingressAnnotation.getTargetPath());
         }
 
@@ -95,7 +94,7 @@ public class KubernetesIngressGenerator {
                 .endRule()
                 .endSpec()
                 .build();
-        String ingressYAML = null;
+        String ingressYAML;
         try {
             ingressYAML = SerializationUtils.dumpAsYaml(ingress);
         } catch (JsonProcessingException e) {
