@@ -28,6 +28,9 @@ public class IngressAnnotation {
     private String hostname;
     private String path;
     private String ingressClass;
+    private String serviceName;
+    private int servicePort;
+    private String targetPath;
 
     public String getName() {
         return name;
@@ -67,5 +70,29 @@ public class IngressAnnotation {
 
     public void setIngressClass(String ingressClass) {
         this.ingressClass = ingressClass;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public int getServicePort() {
+        return servicePort;
+    }
+
+    public void setServicePort(int servicePort) {
+        this.servicePort = servicePort;
+    }
+
+    public String getTargetPath() {
+        return targetPath;
+    }
+
+    public void setTargetPath(String targetPath) {
+        this.targetPath = targetPath;
     }
 }

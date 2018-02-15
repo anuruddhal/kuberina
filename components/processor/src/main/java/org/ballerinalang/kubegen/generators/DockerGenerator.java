@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen;
+package org.ballerinalang.kubegen.generators;
 
 import io.fabric8.docker.client.Config;
 import io.fabric8.docker.client.ConfigBuilder;
@@ -33,8 +33,6 @@ import org.ballerinalang.kubegen.models.DockerAnnotation;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -42,10 +40,11 @@ import java.util.concurrent.CountDownLatch;
  */
 public class DockerGenerator {
 
-    private static final String ENV_SVC_MODE = "SVC_MODE";
     private static final String LOCAL_DOCKER_DAEMON_SOCKET = "unix:///var/run/docker.sock";
     private static final String DOCKER_VELOCITY_TEMPLATE = "templates/Dockerfile.template";
     private static final CountDownLatch buildDone = new CountDownLatch(1);
+    private static final String VELOCITY_FILE_NAME_VARIABLE = "fileName";
+    private static final String VELOCITY_SERVICE_VARIABLE = "isService";
 
     /**
      * Generate Dockerfile based on annotations using velocity template.
@@ -60,8 +59,8 @@ public class DockerGenerator {
         velocityEngine.init();
         Template template = velocityEngine.getTemplate(DOCKER_VELOCITY_TEMPLATE);
         VelocityContext context = new VelocityContext();
-        context.put("fileName", dockerAnnotation.getBalxFileName());
-        context.put("isService", dockerAnnotation.isService());
+        context.put(VELOCITY_FILE_NAME_VARIABLE, dockerAnnotation.getBalxFileName());
+        context.put(VELOCITY_SERVICE_VARIABLE, dockerAnnotation.isService());
         if (dockerAnnotation.isService()) {
             context.put("ports", dockerAnnotation.getPorts());
         }
@@ -70,18 +69,15 @@ public class DockerGenerator {
         return writer.toString();
     }
 
-    public void buildImage(String dockerEnv, String imageName, Path tmpDir, boolean isService) throws
+    public void buildImage(String dockerEnv, String imageName, Path tmpDir) throws
             InterruptedException, IOException {
-        String timestamp = new SimpleDateFormat("yyyy-MM-dd'T'h:m:ssXX").format(new Date());
-        String buildArgs = "{\"" + ENV_SVC_MODE + "\":\"" + String.valueOf(isService) + "\", " +
-                "\"BUILD_DATE\":\"" + timestamp + "\"}";
+
         DockerClient client = getDockerClient(dockerEnv);
         OutputHandle buildHandle = client.image()
                 .build()
                 .withRepositoryName(imageName)
                 .withNoCache()
                 .alwaysRemovingIntermediate()
-                .withBuildArgs(buildArgs)
                 .usingListener(new DockerBuilderEventListener())
                 .fromFolder(tmpDir.toString());
         buildDone.await();

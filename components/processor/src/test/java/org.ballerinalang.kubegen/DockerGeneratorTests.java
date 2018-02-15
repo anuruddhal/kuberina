@@ -18,6 +18,7 @@
 
 package org.ballerinalang.kubegen;
 
+import org.ballerinalang.kubegen.generators.DockerGenerator;
 import org.ballerinalang.kubegen.models.DockerAnnotation;
 import org.ballerinalang.kubegen.utils.KuberinaUtils;
 import org.junit.Assert;
@@ -45,11 +46,13 @@ public class DockerGeneratorTests {
         ports.add(9091);
         ports.add(9092);
         dockerAnnotation.setPorts(ports);
-        dockerAnnotation.setService(false);
+        dockerAnnotation.setService(true);
         dockerAnnotation.setBalxFileName("example.balx");
 
         String dockerfileContent = new DockerGenerator().generate(dockerAnnotation);
-        File dockerfile = new File("target/Dockerfile");
+        File dockerfile = new File("target/kubernetes/docker");
+        dockerfile.mkdirs();
+        dockerfile = new File("target/kubernetes/docker/Dockerfile");
         KuberinaUtils.writeToFile(dockerfileContent, dockerfile.getPath());
         log.info("Dockerfile Content:\n" + dockerfileContent);
         Assert.assertTrue(dockerfile.exists());

@@ -16,16 +16,18 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen;
+package org.ballerinalang.kubegen.generators;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import io.fabric8.kubernetes.api.KubernetesHelper;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.client.internal.SerializationUtils;
+import org.ballerinalang.kubegen.KuberinaConstants;
 import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.kubegen.models.ServiceAnnotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 
 /**
@@ -59,8 +61,8 @@ public class KubernetesServiceGenerator {
                 .build();
         String serviceYAML = null;
         try {
-            serviceYAML = SerializationUtils.dumpAsYaml(service);
-        } catch (JsonProcessingException e) {
+            serviceYAML = KubernetesHelper.toYaml(service);
+        } catch (IOException e) {
             String errorMessage = "Error while generating yaml file for service: " + serviceAnnotation.getName();
             log.error(errorMessage, e);
             throw new ArtifactGenerationException(errorMessage, e);

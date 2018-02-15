@@ -14,10 +14,10 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM Ballerina-base:latest
-MAINTAINER Ballerina Maintainers "dev@ballerina.io"
+FROM ballerina-base:latest
+MAINTAINER ballerina Maintainers "dev@ballerina.io"
 
-COPY ../../${fileName} /home/ballerina/
+COPY ${fileName} /home/ballerina
 
 #if(${isService})
 EXPOSE #foreach( $port in $ports ) $port #end

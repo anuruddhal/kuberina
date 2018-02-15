@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.ballerinalang.kubegen;
+package org.ballerinalang.kubegen.generators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.fabric8.kubernetes.api.model.Container;
@@ -26,6 +26,7 @@ import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
+import org.ballerinalang.kubegen.KuberinaConstants;
 import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.kubegen.models.DeploymentAnnotation;
 import org.slf4j.Logger;
@@ -48,7 +49,6 @@ public class KubernetesDeploymentGenerator {
      * @return Generated kubernetes @{@link Deployment} definition
      */
     public String generate(DeploymentAnnotation deploymentAnnotation) throws ArtifactGenerationException {
-
         List<ContainerPort> containerPorts = null;
         if (deploymentAnnotation.getPorts() != null) {
             containerPorts = populatePorts(deploymentAnnotation.getPorts());

@@ -19,6 +19,7 @@
 package org.ballerinalang.kubegen;
 
 import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
+import org.ballerinalang.kubegen.generators.KubernetesServiceGenerator;
 import org.ballerinalang.kubegen.models.ServiceAnnotation;
 import org.ballerinalang.kubegen.utils.KuberinaUtils;
 import org.junit.Assert;
@@ -52,12 +53,13 @@ public class KubernetesServiceGeneratorTests {
         try {
             String serviceYAML = kubernetesServiceGenerator.generate(serviceAnnotation);
             Assert.assertNotNull(serviceYAML);
-
-            File tempFile = File.createTempFile("temp", serviceAnnotation.getName() + ".yaml", new File("target"));
+            File artifactLocation = new File("target/kubernetes");
+            artifactLocation.mkdir();
+            File tempFile = File.createTempFile("temp", serviceAnnotation.getName() + ".yaml", artifactLocation);
             KuberinaUtils.writeToFile(serviceYAML, tempFile.getPath());
             log.info("Generated YAML: \n" + serviceYAML);
             Assert.assertTrue(tempFile.exists());
-            tempFile.deleteOnExit();
+            //tempFile.deleteOnExit();
         } catch (IOException e) {
             Assert.fail("Unable to write to file");
         } catch (ArtifactGenerationException e) {

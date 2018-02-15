@@ -19,9 +19,6 @@ LABEL maintainer "tryballerina@gmail.com"
 
 # Ballerina runtime distribution filename.
 ARG BALLERINA_DIST
-ARG BUILD_DATE
-ARG VCS_REF
-ARG BUILD_VERSION
 
 # Labels.
 LABEL org.label-schema.schema-version="1.0"
@@ -29,7 +26,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE
 LABEL org.label-schema.name="ballerinalang/ballerina"
 LABEL org.label-schema.description="Ballerina language runtime"
 LABEL org.label-schema.url="http://ballerinalang.org/"
-LABEL org.label-schema.vcs-url="https://github.com/ballerinalang/container-support"
+LABEL org.label-schema.vcs-url="https://github.com/ballerinalang/ballerina"
 LABEL org.label-schema.vcs-ref=$VCS_REF
 LABEL org.label-schema.vendor="WSO2"
 LABEL org.label-schema.version=$BUILD_VERSION
@@ -38,15 +35,12 @@ LABEL org.label-schema.docker.cmd="docker run -v ~/ballerina/packages:/ballerina
 
 # Add Ballerina runtime.
 COPY ${BALLERINA_DIST} /root/
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # Create folders, unzip distribution, create users, & set permissions.
 RUN mkdir -p /ballerina/files \
     && addgroup troupe \
     && adduser -S -s /bin/bash -g 'ballerina' -G troupe -D ballerina \
     && apk add --update bash \
-    && chmod +x /usr/local/bin/docker-entrypoint.sh \
-    && chown ballerina:troupe /usr/local/bin/docker-entrypoint.sh \
     && unzip /root/${BALLERINA_DIST} -d /ballerina/ > /dev/null 2>&1 \
     && mv /ballerina/ballerina* /ballerina/runtime \
     && mkdir -p /ballerina/runtime/logs \
@@ -60,17 +54,6 @@ ENV PATH $BALLERINA_HOME/bin:$PATH
 # Where Ballerina files and archives should be copied to.
 VOLUME /ballerina/files
 
-WORKDIR /ballerina/runtime
+WORKDIR /home/ballerina
 
 USER ballerina
-
-# Ballerina Service port.
-EXPOSE 9090
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-
-# Force child images to override the crucial labels
-ONBUILD ARG BUILD_DATE
-ONBUILD RUN if [ -z "$BUILD_DATE" ]; then >&2 echo "ERROR: Haven't set mandatory build argument \"BUILD_DATE\". Please set an RFC 3339 Date value."; exit 1; fi
-LABEL org.label-schema.build-date=$BUILD_DATE
-

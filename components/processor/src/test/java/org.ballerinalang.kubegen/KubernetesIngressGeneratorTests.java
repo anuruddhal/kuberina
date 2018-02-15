@@ -19,8 +19,8 @@
 package org.ballerinalang.kubegen;
 
 import org.ballerinalang.kubegen.exceptions.ArtifactGenerationException;
-import org.ballerinalang.kubegen.generators.KubernetesDeploymentGenerator;
-import org.ballerinalang.kubegen.models.DeploymentAnnotation;
+import org.ballerinalang.kubegen.generators.KubernetesIngressGenerator;
+import org.ballerinalang.kubegen.models.IngressAnnotation;
 import org.ballerinalang.kubegen.utils.KuberinaUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,49 +29,43 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Generates kubernetes Service from annotations.
  */
-public class KubernetesDeploymentGeneratorTests {
+public class KubernetesIngressGeneratorTests {
 
-    private final Logger log = LoggerFactory.getLogger(KubernetesDeploymentGeneratorTests.class);
+    private final Logger log = LoggerFactory.getLogger(KubernetesIngressGeneratorTests.class);
 
     @Test
-    public void testServiceGenerate() {
-        DeploymentAnnotation deploymentAnnotation = new DeploymentAnnotation();
-        deploymentAnnotation.setName("MyDeployment");
+    public void testIngressGenerator() {
+        IngressAnnotation ingressAnnotation = new IngressAnnotation();
+        ingressAnnotation.setName("MyIngress");
+        ingressAnnotation.setHostname("abc.com");
+        ingressAnnotation.setPath("/helloworld");
+        ingressAnnotation.setServicePort(9090);
+        ingressAnnotation.setIngressClass("nginx");
+        ingressAnnotation.setServiceName("HelloWorldService");
         Map<String, String> labels = new HashMap<>();
         labels.put(KuberinaConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
-        List<Integer> ports = new ArrayList<>();
-        ports.add(9090);
-        ports.add(9091);
-        ports.add(9092);
-        deploymentAnnotation.setLabels(labels);
-        deploymentAnnotation.setImage("SampleImage:v1.0.0");
-        deploymentAnnotation.setImagePullPolicy("Always");
-        deploymentAnnotation.setReplicas(3);
-        deploymentAnnotation.setPorts(ports);
-
-        KubernetesDeploymentGenerator kubernetesDeploymentGenerator = new KubernetesDeploymentGenerator();
+        ingressAnnotation.setLabels(labels);
+        KubernetesIngressGenerator kubernetesIngressGenerator = new KubernetesIngressGenerator();
         try {
-            String deploymentYAML = kubernetesDeploymentGenerator.generate(deploymentAnnotation);
-            Assert.assertNotNull(deploymentYAML);
+            String ingressYaml = kubernetesIngressGenerator.generate(ingressAnnotation);
+            Assert.assertNotNull(ingressYaml);
             File artifactLocation = new File("target/kubernetes");
             artifactLocation.mkdir();
-            File tempFile = File.createTempFile("temp", deploymentAnnotation.getName() + ".yaml", artifactLocation);
-            KuberinaUtils.writeToFile(deploymentYAML, tempFile.getPath());
-            log.info("Generated YAML: \n" + deploymentYAML);
+            File tempFile = File.createTempFile("temp", ingressAnnotation.getName() + ".yaml", artifactLocation);
+            KuberinaUtils.writeToFile(ingressYaml, tempFile.getPath());
+            log.info("Generated YAML: \n" + ingressYaml);
             Assert.assertTrue(tempFile.exists());
-        //    tempFile.deleteOnExit();
+            // tempFile.deleteOnExit();
         } catch (IOException e) {
             Assert.fail("Unable to write to file");
         } catch (ArtifactGenerationException e) {
-            Assert.fail("Unable to generate yaml from service");
+            Assert.fail("Unable to generate yaml from ingress");
         }
     }
 }
