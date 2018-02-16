@@ -31,8 +31,8 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.ballerinalang.artifactgen.models.DockerAnnotation;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.StringWriter;
-import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -44,7 +44,9 @@ public class DockerGenerator {
     private static final String DOCKER_VELOCITY_TEMPLATE = "templates/Dockerfile.template";
     private static final CountDownLatch buildDone = new CountDownLatch(1);
     private static final String VELOCITY_FILE_NAME_VARIABLE = "fileName";
+    private static final String VELOCITY_FILE_PATH_VARIABLE = "filePath";
     private static final String VELOCITY_SERVICE_VARIABLE = "isService";
+    private static final PrintStream out = System.out;
 
     /**
      * Generate Dockerfile based on annotations using velocity template.
@@ -61,6 +63,7 @@ public class DockerGenerator {
         VelocityContext context = new VelocityContext();
         context.put(VELOCITY_FILE_NAME_VARIABLE, dockerAnnotation.getBalxFileName());
         context.put(VELOCITY_SERVICE_VARIABLE, dockerAnnotation.isService());
+        context.put(VELOCITY_FILE_PATH_VARIABLE, dockerAnnotation.getBalxFilePath());
         if (dockerAnnotation.isService()) {
             context.put("ports", dockerAnnotation.getPorts());
         }
@@ -69,9 +72,17 @@ public class DockerGenerator {
         return writer.toString();
     }
 
-    public static void buildImage(String dockerEnv, String imageName, Path tmpDir) throws
+    /**
+     * Create docker image.
+     *
+     * @param dockerEnv docker env
+     * @param imageName docker image name
+     * @param dockerDir dockerfile directory
+     * @throws InterruptedException When error with docker build process
+     * @throws IOException When error with docker build process
+     */
+    public static void buildImage(String dockerEnv, String imageName, String dockerDir) throws
             InterruptedException, IOException {
-
         DockerClient client = getDockerClient(dockerEnv);
         OutputHandle buildHandle = client.image()
                 .build()
@@ -79,7 +90,7 @@ public class DockerGenerator {
                 .withNoCache()
                 .alwaysRemovingIntermediate()
                 .usingListener(new DockerBuilderEventListener())
-                .fromFolder(tmpDir.toString());
+                .fromFolder(dockerDir);
         buildDone.await();
         buildHandle.close();
         client.close();
@@ -118,11 +129,13 @@ public class DockerGenerator {
 
         @Override
         public void onError(String errorEvent) {
+            out.println("Error event occurred while building docker image: " + errorEvent);
             buildDone.countDown();
         }
 
         @Override
         public void onError(Throwable throwable) {
+            out.println("Error while building docker image: " + throwable.getMessage());
             buildDone.countDown();
         }
 

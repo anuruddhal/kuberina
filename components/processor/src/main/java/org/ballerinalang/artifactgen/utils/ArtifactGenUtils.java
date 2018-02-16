@@ -19,29 +19,30 @@
 package org.ballerinalang.artifactgen.utils;
 
 import org.ballerinalang.artifactgen.ArtifactGenConstants;
+import org.ballerinalang.net.http.Constants;
+import org.ballerinalang.util.codegen.AnnAttachmentInfo;
+import org.ballerinalang.util.codegen.AnnAttributeValue;
+import org.ballerinalang.util.codegen.ServiceInfo;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Util methods used for doc generation.
+ * Util methods used for artifact generation.
  */
 public class ArtifactGenUtils {
 
     private static final boolean debugEnabled = "true".equals(System.getProperty(
             ArtifactGenConstants.ENABLE_DEBUG_LOGS));
-    private static final PrintStream out = System.out;
 
     public static void writeToFile(String context, String targetFilePath) throws IOException {
+        File dockerfile = new File(targetFilePath);
+        dockerfile.getParentFile().mkdirs();
         Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -49,38 +50,18 @@ public class ArtifactGenUtils {
         return debugEnabled;
     }
 
-    /**
-     * Visits a folder recursively and copy folders and files to a target directory.
-     */
-    static class RecursiveFileVisitor extends SimpleFileVisitor<Path> {
-        Path source;
-        Path target;
+    public static boolean isEmpty(String str) {
+        return str == null || str.length() == 0;
+    }
 
-        public RecursiveFileVisitor(Path aSource, Path aTarget) {
-            this.source = aSource;
-            this.target = aTarget;
+    public static List<Integer> extractPorts(ServiceInfo serviceInfo) {
+        List<Integer> ports = new ArrayList<>();
+        AnnAttachmentInfo annotationInfo = serviceInfo.getAnnotationAttachmentInfo(Constants
+                .HTTP_PACKAGE_PATH, Constants.ANN_NAME_CONFIG);
+        AnnAttributeValue portAttrVal = annotationInfo.getAttributeValue(Constants.ANN_CONFIG_ATTR_PORT);
+        if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
+            ports.add(Math.toIntExact(portAttrVal.getIntValue()));
         }
-
-        @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-            Path targetdir = target.resolve(source.relativize(dir).toString());
-            try {
-                Files.copy(dir, targetdir);
-            } catch (FileAlreadyExistsException e) {
-                if (!Files.isDirectory(targetdir)) {
-                    throw e;
-                }
-            }
-            return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-            Files.copy(file, target.resolve(source.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-            if (ArtifactGenUtils.isDebugEnabled()) {
-                out.println("File copied: " + file.toString());
-            }
-            return FileVisitResult.CONTINUE;
-        }
+        return ports;
     }
 }

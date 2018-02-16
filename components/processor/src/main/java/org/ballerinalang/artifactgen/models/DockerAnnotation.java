@@ -30,6 +30,7 @@ public class DockerAnnotation {
     private String username;
     private String password;
     private String balxFileName;
+    private String balxFilePath;
     private boolean push;
     private boolean isService;
     private List<Integer> ports;
@@ -104,5 +105,29 @@ public class DockerAnnotation {
 
     public void setService(boolean service) {
         isService = service;
+    }
+
+    @Override
+    public String toString() {
+        return "DockerAnnotation{" +
+                "name='" + name + '\'' +
+                ", registry='" + registry + '\'' +
+                ", tag='" + tag + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", balxFileName='" + balxFileName + '\'' +
+                ", balxFilePath='" + balxFilePath + '\'' +
+                ", push=" + push +
+                ", isService=" + isService +
+                ", ports=" + ports +
+                '}';
+    }
+
+    public String getBalxFilePath() {
+        return balxFilePath;
+    }
+
+    public void setBalxFilePath(String balxFilePath) {
+        this.balxFilePath = balxFilePath;
     }
 }

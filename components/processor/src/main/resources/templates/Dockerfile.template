@@ -17,7 +17,7 @@
 FROM ballerina-base:latest
 MAINTAINER ballerina Maintainers "dev@ballerina.io"
 
-COPY ${fileName} /home/ballerina
+COPY ${filePath} /home/ballerina
 
 #if(${isService})
 EXPOSE #foreach( $port in $ports ) $port #end
