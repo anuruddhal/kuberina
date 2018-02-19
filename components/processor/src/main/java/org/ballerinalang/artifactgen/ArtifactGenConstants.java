@@ -34,15 +34,27 @@ public class ArtifactGenConstants {
     public static final String INGRESS_ANNOTATION = "ingress";
     public static final String DOCKER_ANNOTATION = "configuration";
 
-    //Docker annotations
+    //Docker annotation constants
     public static final String DOCKER_NAME = "name";
     public static final String DOCKER_REGISTRY = "registry";
     public static final String DOCKER_TAG = "tag";
     public static final String DOCKER_USERNAME = "username";
     public static final String DOCKER_PASSWORD = "password";
-    public static final String DOCKER_BALX_FILE_NAME = "balxFileName";
     public static final String DOCKER_PUSH = "push";
-    public static final String DOCKER_IS_SERVICE = "isService";
-    public static final String DOCKER_PORTS = "ports";
     public static final String DOCKER_TAG_LATEST = "latest";
+
+    //Deployment annotation constants
+    public static final String DEPLOYMENT_NAME = "name";
+    public static final String DEPLOYMENT_LABELS = "labels";
+    public static final String DEPLOYMENT_REPLICAS = "replicas";
+    public static final String DEPLOYMENT_LIVENESS = "liveness";
+    public static final String DEPLOYMENT_INITIAL_DELAY_SECONDS = "initialDelaySeconds";
+    public static final String DEPLOYMENT_PERIOD_SECONDS = "periodSeconds";
+    public static final String DEPLOYMENT_IMAGE_PULL_POLICY = "imagePullPolicy";
+    public static final String DEPLOYMENT_NAMESPACE = "namespace";
+    public static final String DEPLOYMENT_IMAGE = "image";
+    public static final String DEPLOYMENT_IMAGE_BUILD = "imageBuild";
+    public static final String DEPLOYMENT_NAMESPACE_DEFAULT = "default";
+    public static final String DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT = "IfNotPresent";
+    public static final String DEPLOYMENT_LIVENESS_DISABLE = "disable";
 }

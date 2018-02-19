@@ -114,4 +114,20 @@ public class DeploymentModel {
     public void setPorts(List<Integer> ports) {
         this.ports = ports;
     }
+
+    @Override
+    public String toString() {
+        return "DeploymentModel{" +
+                "name='" + name + '\'' +
+                ", labels=" + labels +
+                ", replicas=" + replicas +
+                ", liveness='" + liveness + '\'' +
+                ", initialDelaySeconds=" + initialDelaySeconds +
+                ", periodSeconds=" + periodSeconds +
+                ", imagePullPolicy='" + imagePullPolicy + '\'' +
+                ", namespace='" + namespace + '\'' +
+                ", image='" + image + '\'' +
+                ", ports=" + ports +
+                '}';
+    }
 }

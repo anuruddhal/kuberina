@@ -24,8 +24,6 @@ public class Main {
         //String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
         String filePath = args[0];
         String userDir = System.getProperty("user.dir");
-        String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File.separator;
-        out.println("target " + targetPath);
         try {
             byte[] bFile = Files.readAllBytes(Paths.get(filePath));
             ProgramFileReader reader = new ProgramFileReader();
@@ -33,12 +31,12 @@ public class Main {
             ProgramFile programFile = reader.readProgram(byteArrayInputStream);
             PackageInfo packageInfos[] = programFile.getPackageInfoEntries();
             ServiceInfo serviceInfos[];
-            //Arrays.stream(packageInfos).forEach(num -> num.getServiceInfoEntries());
 
             for (int i = 0; i < packageInfos.length; i++) {
                 PackageInfo packageInfo = packageInfos[i];
                 serviceInfos = packageInfo.getServiceInfoEntries();
                 int dockerCount = 0;
+                int deploymentCount = 0;
                 for (int j = 0; j < serviceInfos.length; j++) {
                     ServiceInfo serviceInfo = serviceInfos[j];
                     AnnAttachmentInfo deploymentAnnotation = serviceInfo.getAnnotationAttachmentInfo
@@ -55,7 +53,17 @@ public class Main {
                                     ArtifactGenConstants.DOCKER_ANNOTATION);
 
                     if (deploymentAnnotation != null) {
+                        out.println("Deployment annotation detected.");
+                        deploymentCount += 1;
+                        if (deploymentCount > 1) {
+                            out.println("Warning : multiple deployment annotations detected. Ignoring annotation in " +
+                                    "service: " + serviceInfo.getName());
+                            continue;
+                        }
                         out.println("Deployment " + deploymentAnnotation.getAttributeValueMap());
+                        String targetPath = userDir + File.separator + "target" + File.separator + serviceInfo
+                                .getName() + File.separator;
+                        ArtifactGenerator.processDeploymentAnnotationForService(serviceInfo, filePath, targetPath);
                     }
                     if (serviceAnnotation != null) {
                         out.println("Service " + serviceAnnotation.getAttributeValueMap());
@@ -64,13 +72,16 @@ public class Main {
                         out.println("Ingress " + ingressAnnotation.getAttributeValueMap());
                     }
                     if (dockerAnnotation != null) {
-                        out.println("Docker " + dockerAnnotation.getAttributeValueMap());
+                        out.println("Docker annotation detected.");
                         dockerCount += 1;
                         if (dockerCount > 1) {
                             out.println("Warning : multiple docker annotations detected. Ignoring annotation in " +
-                                    "service " + serviceInfo.getName());
+                                    "service: " + serviceInfo.getName());
                             continue;
                         }
+                        String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File
+                                .separator;
+                        out.println("Output Directory " + targetPath);
                         ArtifactGenerator.processDockerAnnotationForService(serviceInfo, filePath, targetPath);
                     }
 

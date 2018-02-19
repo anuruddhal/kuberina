@@ -44,13 +44,26 @@ public class ArtifactGenUtils {
             ArtifactGenConstants.ENABLE_DEBUG_LOGS));
     private static final PrintStream error = System.err;
 
+    /**
+     * Write content to a File.
+     *
+     * @param context        context of the file
+     * @param targetFilePath target file path
+     * @throws IOException If an error occurs when writing to a file
+     */
     public static void writeToFile(String context, String targetFilePath) throws IOException {
-        File dockerfile = new File(targetFilePath);
-        if (dockerfile.getParentFile().mkdirs()) {
+        File newFile = new File(targetFilePath);
+        if (newFile.getParentFile().mkdirs()) {
             Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
         }
     }
 
+    /**
+     * Copy file from source to destination.
+     *
+     * @param source      source file path
+     * @param destination destination file path
+     */
     public static void copyFile(String source, String destination) {
         File sourceFile = new File(source);
         File destinationFile = new File(destination);
@@ -83,6 +96,8 @@ public class ArtifactGenUtils {
         if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
             ports.add(Math.toIntExact(portAttrVal.getIntValue()));
         }
+        //TODO: remove this with actual port(s)
+        ports.add(9090);
         return ports;
     }
 }

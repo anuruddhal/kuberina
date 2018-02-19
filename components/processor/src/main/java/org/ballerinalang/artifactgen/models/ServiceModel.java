@@ -68,4 +68,15 @@ public class ServiceModel {
     public void setSelector(String selector) {
         this.selector = selector;
     }
+
+    @Override
+    public String toString() {
+        return "ServiceModel{" +
+                "name='" + name + '\'' +
+                ", labels=" + labels +
+                ", serviceType='" + serviceType + '\'' +
+                ", port=" + port +
+                ", selector='" + selector + '\'' +
+                '}';
+    }
 }

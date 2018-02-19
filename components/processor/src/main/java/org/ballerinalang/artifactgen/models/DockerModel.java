@@ -33,6 +33,7 @@ public class DockerModel {
     private String balxFilePath;
     private boolean push;
     private boolean isService;
+    private boolean imageBuild;
     private List<Integer> ports;
 
     public String getName() {
@@ -129,5 +130,13 @@ public class DockerModel {
 
     public void setBalxFilePath(String balxFilePath) {
         this.balxFilePath = balxFilePath;
+    }
+
+    public boolean isImageBuild() {
+        return imageBuild;
+    }
+
+    public void setImageBuild(boolean imageBuild) {
+        this.imageBuild = imageBuild;
     }
 }

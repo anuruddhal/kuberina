@@ -95,4 +95,18 @@ public class IngressModel {
     public void setTargetPath(String targetPath) {
         this.targetPath = targetPath;
     }
+
+    @Override
+    public String toString() {
+        return "IngressModel{" +
+                "name='" + name + '\'' +
+                ", labels=" + labels +
+                ", hostname='" + hostname + '\'' +
+                ", path='" + path + '\'' +
+                ", ingressClass='" + ingressClass + '\'' +
+                ", serviceName='" + serviceName + '\'' +
+                ", servicePort=" + servicePort +
+                ", targetPath='" + targetPath + '\'' +
+                '}';
+    }
 }
