@@ -20,7 +20,7 @@ package org.ballerinalang.artifactgen;
 
 import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.artifactgen.generators.KubernetesIngressGenerator;
-import org.ballerinalang.artifactgen.models.IngressAnnotation;
+import org.ballerinalang.artifactgen.models.IngressModel;
 import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,23 +41,23 @@ public class KubernetesIngressGeneratorTests {
 
     @Test
     public void testIngressGenerator() {
-        IngressAnnotation ingressAnnotation = new IngressAnnotation();
-        ingressAnnotation.setName("MyIngress");
-        ingressAnnotation.setHostname("abc.com");
-        ingressAnnotation.setPath("/helloworld");
-        ingressAnnotation.setServicePort(9090);
-        ingressAnnotation.setIngressClass("nginx");
-        ingressAnnotation.setServiceName("HelloWorldService");
+        IngressModel ingressModel = new IngressModel();
+        ingressModel.setName("MyIngress");
+        ingressModel.setHostname("abc.com");
+        ingressModel.setPath("/helloworld");
+        ingressModel.setServicePort(9090);
+        ingressModel.setIngressClass("nginx");
+        ingressModel.setServiceName("HelloWorldService");
         Map<String, String> labels = new HashMap<>();
         labels.put(ArtifactGenConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
-        ingressAnnotation.setLabels(labels);
+        ingressModel.setLabels(labels);
         KubernetesIngressGenerator kubernetesIngressGenerator = new KubernetesIngressGenerator();
         try {
-            String ingressYaml = kubernetesIngressGenerator.generate(ingressAnnotation);
+            String ingressYaml = kubernetesIngressGenerator.generate(ingressModel);
             Assert.assertNotNull(ingressYaml);
             File artifactLocation = new File("target/kubernetes");
             artifactLocation.mkdir();
-            File tempFile = File.createTempFile("temp", ingressAnnotation.getName() + ".yaml", artifactLocation);
+            File tempFile = File.createTempFile("temp", ingressModel.getName() + ".yaml", artifactLocation);
             ArtifactGenUtils.writeToFile(ingressYaml, tempFile.getPath());
             log.info("Generated YAML: \n" + ingressYaml);
             Assert.assertTrue(tempFile.exists());

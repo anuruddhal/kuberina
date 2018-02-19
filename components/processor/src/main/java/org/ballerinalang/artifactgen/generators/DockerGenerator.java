@@ -28,7 +28,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.ballerinalang.artifactgen.models.DockerAnnotation;
+import org.ballerinalang.artifactgen.models.DockerModel;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -51,21 +51,21 @@ public class DockerGenerator {
     /**
      * Generate Dockerfile based on annotations using velocity template.
      *
-     * @param dockerAnnotation {@link DockerAnnotation} object
+     * @param dockerModel {@link DockerModel} object
      * @return Dockerfile content as a string
      */
-    public static String generate(DockerAnnotation dockerAnnotation) {
+    public static String generate(DockerModel dockerModel) {
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         velocityEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
         velocityEngine.init();
         Template template = velocityEngine.getTemplate(DOCKER_VELOCITY_TEMPLATE);
         VelocityContext context = new VelocityContext();
-        context.put(VELOCITY_FILE_NAME_VARIABLE, dockerAnnotation.getBalxFileName());
-        context.put(VELOCITY_SERVICE_VARIABLE, dockerAnnotation.isService());
-        context.put(VELOCITY_FILE_PATH_VARIABLE, dockerAnnotation.getBalxFilePath());
-        if (dockerAnnotation.isService()) {
-            context.put("ports", dockerAnnotation.getPorts());
+        context.put(VELOCITY_FILE_NAME_VARIABLE, dockerModel.getBalxFileName());
+        context.put(VELOCITY_SERVICE_VARIABLE, dockerModel.isService());
+        context.put(VELOCITY_FILE_PATH_VARIABLE, dockerModel.getBalxFilePath());
+        if (dockerModel.isService()) {
+            context.put("ports", dockerModel.getPorts());
         }
         StringWriter writer = new StringWriter();
         template.merge(context, writer);

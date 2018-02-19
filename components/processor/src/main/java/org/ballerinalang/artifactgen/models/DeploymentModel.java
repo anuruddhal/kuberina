@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Kubernetes deployment annotations model class.
  */
-public class DeploymentAnnotation {
+public class DeploymentModel {
     private String name;
     private Map<String, String> labels;
     private int replicas;

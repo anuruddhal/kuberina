@@ -19,7 +19,7 @@
 package org.ballerinalang.artifactgen;
 
 import org.ballerinalang.artifactgen.generators.DockerGenerator;
-import org.ballerinalang.artifactgen.models.DockerAnnotation;
+import org.ballerinalang.artifactgen.models.DockerModel;
 import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,16 +40,16 @@ public class DockerGeneratorTests {
 
     @Test
     public void testDockerGenerate() throws IOException {
-        DockerAnnotation dockerAnnotation = new DockerAnnotation();
+        DockerModel dockerModel = new DockerModel();
         List<Integer> ports = new ArrayList<>();
         ports.add(9090);
         ports.add(9091);
         ports.add(9092);
-        dockerAnnotation.setPorts(ports);
-        dockerAnnotation.setService(true);
-        dockerAnnotation.setBalxFileName("example.balx");
+        dockerModel.setPorts(ports);
+        dockerModel.setService(true);
+        dockerModel.setBalxFileName("example.balx");
 
-        String dockerfileContent = DockerGenerator.generate(dockerAnnotation);
+        String dockerfileContent = DockerGenerator.generate(dockerModel);
         File dockerfile = new File("target/kubernetes/docker");
         dockerfile.mkdirs();
         dockerfile = new File("target/kubernetes/docker/Dockerfile");

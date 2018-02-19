@@ -25,7 +25,10 @@ import org.ballerinalang.util.codegen.AnnAttributeValue;
 import org.ballerinalang.util.codegen.ServiceInfo;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -39,11 +42,29 @@ public class ArtifactGenUtils {
 
     private static final boolean debugEnabled = "true".equals(System.getProperty(
             ArtifactGenConstants.ENABLE_DEBUG_LOGS));
+    private static final PrintStream error = System.err;
 
     public static void writeToFile(String context, String targetFilePath) throws IOException {
         File dockerfile = new File(targetFilePath);
-        dockerfile.getParentFile().mkdirs();
-        Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
+        if (dockerfile.getParentFile().mkdirs()) {
+            Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    public static void copyFile(String source, String destination) {
+        File sourceFile = new File(source);
+        File destinationFile = new File(destination);
+        try (FileInputStream fileInputStream = new FileInputStream(sourceFile);
+             FileOutputStream fileOutputStream = new FileOutputStream(destinationFile)) {
+            int bufferSize;
+            byte[] buffer = new byte[512];
+            while ((bufferSize = fileInputStream.read(buffer)) > 0) {
+                fileOutputStream.write(buffer, 0, bufferSize);
+            }
+        } catch (IOException e) {
+            error.println("Error while copying file. File not found " + e.getMessage());
+        }
+
     }
 
     public static boolean isDebugEnabled() {

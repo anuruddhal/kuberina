@@ -20,7 +20,7 @@ package org.ballerinalang.artifactgen;
 
 import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.artifactgen.generators.KubernetesServiceGenerator;
-import org.ballerinalang.artifactgen.models.ServiceAnnotation;
+import org.ballerinalang.artifactgen.models.ServiceModel;
 import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,21 +41,21 @@ public class KubernetesServiceGeneratorTests {
 
     @Test
     public void testServiceGenerate() {
-        ServiceAnnotation serviceAnnotation = new ServiceAnnotation();
-        serviceAnnotation.setName("MyService");
-        serviceAnnotation.setPort(9090);
-        serviceAnnotation.setServiceType("NodePort");
-        serviceAnnotation.setSelector("MyAPP");
+        ServiceModel serviceModel = new ServiceModel();
+        serviceModel.setName("MyService");
+        serviceModel.setPort(9090);
+        serviceModel.setServiceType("NodePort");
+        serviceModel.setSelector("MyAPP");
         Map<String, String> labels = new HashMap<>();
         labels.put(ArtifactGenConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
-        serviceAnnotation.setLabels(labels);
+        serviceModel.setLabels(labels);
         KubernetesServiceGenerator kubernetesServiceGenerator = new KubernetesServiceGenerator();
         try {
-            String serviceYAML = kubernetesServiceGenerator.generate(serviceAnnotation);
+            String serviceYAML = kubernetesServiceGenerator.generate(serviceModel);
             Assert.assertNotNull(serviceYAML);
             File artifactLocation = new File("target/kubernetes");
             artifactLocation.mkdir();
-            File tempFile = File.createTempFile("temp", serviceAnnotation.getName() + ".yaml", artifactLocation);
+            File tempFile = File.createTempFile("temp", serviceModel.getName() + ".yaml", artifactLocation);
             ArtifactGenUtils.writeToFile(serviceYAML, tempFile.getPath());
             log.info("Generated YAML: \n" + serviceYAML);
             Assert.assertTrue(tempFile.exists());

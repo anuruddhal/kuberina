@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Docker annotations model class.
  */
-public class DockerAnnotation {
+public class DockerModel {
     private String name;
     private String registry;
     private String tag;
@@ -109,7 +109,7 @@ public class DockerAnnotation {
 
     @Override
     public String toString() {
-        return "DockerAnnotation{" +
+        return "DockerModel{" +
                 "name='" + name + '\'' +
                 ", registry='" + registry + '\'' +
                 ", tag='" + tag + '\'' +

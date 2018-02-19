@@ -20,7 +20,7 @@ package org.ballerinalang.artifactgen;
 
 import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.artifactgen.generators.KubernetesDeploymentGenerator;
-import org.ballerinalang.artifactgen.models.DeploymentAnnotation;
+import org.ballerinalang.artifactgen.models.DeploymentModel;
 import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,26 +43,26 @@ public class KubernetesDeploymentGeneratorTests {
 
     @Test
     public void testServiceGenerate() {
-        DeploymentAnnotation deploymentAnnotation = new DeploymentAnnotation();
-        deploymentAnnotation.setName("MyDeployment");
+        DeploymentModel deploymentModel = new DeploymentModel();
+        deploymentModel.setName("MyDeployment");
         Map<String, String> labels = new HashMap<>();
         labels.put(ArtifactGenConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
         List<Integer> ports = new ArrayList<>();
         ports.add(9090);
         ports.add(9091);
         ports.add(9092);
-        deploymentAnnotation.setLabels(labels);
-        deploymentAnnotation.setImage("SampleImage:v1.0.0");
-        deploymentAnnotation.setImagePullPolicy("Always");
-        deploymentAnnotation.setReplicas(3);
-        deploymentAnnotation.setPorts(ports);
+        deploymentModel.setLabels(labels);
+        deploymentModel.setImage("SampleImage:v1.0.0");
+        deploymentModel.setImagePullPolicy("Always");
+        deploymentModel.setReplicas(3);
+        deploymentModel.setPorts(ports);
 
         try {
-            String deploymentYAML = KubernetesDeploymentGenerator.generate(deploymentAnnotation);
+            String deploymentYAML = KubernetesDeploymentGenerator.generate(deploymentModel);
             Assert.assertNotNull(deploymentYAML);
             File artifactLocation = new File("target/kubernetes");
             artifactLocation.mkdir();
-            File tempFile = File.createTempFile("temp", deploymentAnnotation.getName() + ".yaml", artifactLocation);
+            File tempFile = File.createTempFile("temp", deploymentModel.getName() + ".yaml", artifactLocation);
             ArtifactGenUtils.writeToFile(deploymentYAML, tempFile.getPath());
             log.info("Generated YAML: \n" + deploymentYAML);
             Assert.assertTrue(tempFile.exists());

@@ -28,7 +28,7 @@ import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
 import org.ballerinalang.artifactgen.ArtifactGenConstants;
 import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
-import org.ballerinalang.artifactgen.models.DeploymentAnnotation;
+import org.ballerinalang.artifactgen.models.DeploymentModel;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -44,24 +44,24 @@ public class KubernetesDeploymentGenerator {
     /**
      * Generate kubernetes deployment definition from annotation.
      *
-     * @param deploymentAnnotation {@link DeploymentAnnotation} object
+     * @param deploymentModel {@link DeploymentModel} object
      * @return Generated kubernetes @{@link Deployment} definition
      */
-    public static String generate(DeploymentAnnotation deploymentAnnotation) throws ArtifactGenerationException {
+    public static String generate(DeploymentModel deploymentModel) throws ArtifactGenerationException {
         List<ContainerPort> containerPorts = null;
-        if (deploymentAnnotation.getPorts() != null) {
-            containerPorts = populatePorts(deploymentAnnotation.getPorts());
+        if (deploymentModel.getPorts() != null) {
+            containerPorts = populatePorts(deploymentModel.getPorts());
         }
-        Container container = generateContainer(deploymentAnnotation, containerPorts);
+        Container container = generateContainer(deploymentModel, containerPorts);
         Deployment deployment = new DeploymentBuilder()
                 .withNewMetadata()
-                .withName(deploymentAnnotation.getName())
+                .withName(deploymentModel.getName())
                 .endMetadata()
                 .withNewSpec()
-                .withReplicas(deploymentAnnotation.getReplicas())
+                .withReplicas(deploymentModel.getReplicas())
                 .withNewTemplate()
                 .withNewMetadata()
-                .addToLabels(deploymentAnnotation.getLabels())
+                .addToLabels(deploymentModel.getLabels())
                 .endMetadata()
                 .withNewSpec()
                 .withContainers(container)
@@ -73,7 +73,7 @@ public class KubernetesDeploymentGenerator {
         try {
             deploymentYAML = SerializationUtils.dumpWithoutRuntimeStateAsYaml(deployment);
         } catch (JsonProcessingException e) {
-            String errorMessage = "Error while parsing yaml file for deployment: " + deploymentAnnotation.getName();
+            String errorMessage = "Error while parsing yaml file for deployment: " + deploymentModel.getName();
             out.println(errorMessage);
             throw new ArtifactGenerationException(errorMessage, e);
         }
@@ -92,12 +92,12 @@ public class KubernetesDeploymentGenerator {
         return containerPorts;
     }
 
-    private static Container generateContainer(DeploymentAnnotation deploymentAnnotation, List<ContainerPort>
+    private static Container generateContainer(DeploymentModel deploymentModel, List<ContainerPort>
             containerPorts) {
         return new ContainerBuilder()
-                .withName(deploymentAnnotation.getName())
-                .withImage(deploymentAnnotation.getImage())
-                .withImagePullPolicy(deploymentAnnotation.getImagePullPolicy())
+                .withName(deploymentModel.getName())
+                .withImage(deploymentModel.getImage())
+                .withImagePullPolicy(deploymentModel.getImagePullPolicy())
                 .withPorts(containerPorts)
                 .build();
     }

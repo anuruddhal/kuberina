@@ -21,10 +21,18 @@ package org.ballerinalang.artifactgen.cmd;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import org.ballerinalang.artifactgen.ArtifactGenConstants;
+import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
+import org.ballerinalang.artifactgen.generators.KubernetesDeploymentGenerator;
+import org.ballerinalang.artifactgen.models.DeploymentModel;
 import org.ballerinalang.launcher.BLauncherCmd;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Artifact command for ballerina which generates docker/kubernetes artifacts from Ballerina program.
@@ -36,7 +44,7 @@ public class BallerinaArtifactCmd implements BLauncherCmd {
     private JCommander parentCmdParser;
 
     @Parameter(arity = 1, description = "Path to the .balx file")
-    private String balxFilePath;
+    private List<String> balxFilePath;
 
     @Parameter(names = {"--output", "-o"},
             description = "path to the output directory where the artifacts will be saved to", hidden =
@@ -58,10 +66,10 @@ public class BallerinaArtifactCmd implements BLauncherCmd {
             return;
         }
 
-        if (balxFilePath == null || balxFilePath.length() == 0) {
+        if (balxFilePath == null || balxFilePath.size() == 0) {
             StringBuilder sb = new StringBuilder("artifacts: Valid .balx file is not provided."
                     + System.lineSeparator());
-            sb.append(BLauncherCmd.getCommandUsageInfo(parentCmdParser, "doc"));
+            sb.append(BLauncherCmd.getCommandUsageInfo(parentCmdParser, "artifacts"));
             out.println(sb);
             return;
         }
@@ -75,6 +83,25 @@ public class BallerinaArtifactCmd implements BLauncherCmd {
             out.println("Saving artifacts to " + outputDir);
         }
         out.println("Starting artifact generation ...");
+        DeploymentModel deploymentModel = new DeploymentModel();
+        deploymentModel.setName("MyDeployment");
+        Map<String, String> labels = new HashMap<>();
+        labels.put(ArtifactGenConstants.KUBERNETES_SELECTOR_KEY, "TestAPP");
+        List<Integer> ports = new ArrayList<>();
+        ports.add(9090);
+        ports.add(9091);
+        ports.add(9092);
+        deploymentModel.setLabels(labels);
+        deploymentModel.setImage("SampleImage:v1.0.0");
+        deploymentModel.setImagePullPolicy("Always");
+        deploymentModel.setReplicas(3);
+        deploymentModel.setPorts(ports);
+        try {
+            out.println(KubernetesDeploymentGenerator.generate(deploymentModel));
+        } catch (ArtifactGenerationException e) {
+            out.println("Error in generating deployment " + e.getMessage());
+            out.println("Error in generating deployment " + e.getCause());
+        }
     }
 
     @Override

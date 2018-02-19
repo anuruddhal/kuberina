@@ -18,9 +18,8 @@
 
 package org.ballerinalang.artifactgen;
 
-import io.fabric8.utils.Files;
 import org.ballerinalang.artifactgen.generators.DockerGenerator;
-import org.ballerinalang.artifactgen.models.DockerAnnotation;
+import org.ballerinalang.artifactgen.models.DockerModel;
 import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.ballerinalang.util.codegen.AnnAttachmentInfo;
 import org.ballerinalang.util.codegen.ServiceInfo;
@@ -35,9 +34,10 @@ import java.io.PrintStream;
 public class ArtifactGenerator {
 
     private static final PrintStream out = System.out;
+    private static final PrintStream error = System.err;
 
     /**
-     * Process docker annotations for ballerina Service
+     * Process docker annotations for ballerina Service.
      *
      * @param serviceInfo  ServiceInfo Object
      * @param balxFilePath ballerina file name
@@ -50,53 +50,51 @@ public class ArtifactGenerator {
         if (dockerAnnotationInfo == null) {
             return;
         }
-        DockerAnnotation dockerAnnotation = new DockerAnnotation();
-        dockerAnnotation.setService(true);
+        DockerModel dockerModel = new DockerModel();
+        dockerModel.setService(true);
         String nameValue = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME) != null ?
                 dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME).getStringValue() :
                 balxFilePath.substring(balxFilePath.lastIndexOf(File.separator) + 1, balxFilePath.lastIndexOf("" +
                         ".balx"));
-        dockerAnnotation.setName(nameValue);
+        dockerModel.setName(nameValue);
         String balxFileName = nameValue + ".balx";
-        dockerAnnotation.setBalxFileName(balxFileName);
-        dockerAnnotation.setBalxFilePath(balxFileName);
+        dockerModel.setBalxFileName(balxFileName);
+        dockerModel.setBalxFilePath(balxFileName);
         String tag = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_TAG) != null ?
                 dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_TAG).getStringValue() :
                 ArtifactGenConstants.DOCKER_TAG_LATEST;
-        dockerAnnotation.setTag(tag);
+        dockerModel.setTag(tag);
 
         String registry = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_REGISTRY) != null ?
                 dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_REGISTRY).getStringValue() : null;
-        dockerAnnotation.setRegistry(registry);
+        dockerModel.setRegistry(registry);
 
         String username = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_USERNAME) != null ? dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_USERNAME).getStringValue() : null;
-        dockerAnnotation.setUsername(username);
+        dockerModel.setUsername(username);
 
         String password = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_PASSWORD) != null ? dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_PASSWORD).getStringValue() : null;
-        dockerAnnotation.setPassword(password);
+        dockerModel.setPassword(password);
 
         boolean push = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_PUSH) != null && dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_PUSH).getBooleanValue();
-        dockerAnnotation.setPush(push);
-        dockerAnnotation.setPorts(ArtifactGenUtils.extractPorts(serviceInfo));
-        out.println(dockerAnnotation);
-        String dockerContent = DockerGenerator.generate(dockerAnnotation);
-        out.println("Dockerfile Content \n" + dockerContent);
+        dockerModel.setPush(push);
+        dockerModel.setPorts(ArtifactGenUtils.extractPorts(serviceInfo));
+        out.println(dockerModel);
+        String dockerContent = DockerGenerator.generate(dockerModel);
+        //out.println("Dockerfile Content \n" + dockerContent);
         try {
-            File balxFile = new File(balxFilePath);
-            File destFile = new File(outputDir + File.separator + balxFileName);
-            Files.copy(balxFile, destFile);
+            ArtifactGenUtils.copyFile(balxFilePath, outputDir + File.separator + balxFileName);
             ArtifactGenUtils.writeToFile(dockerContent, outputDir + File.separator + "Dockerfile");
-            DockerGenerator.buildImage(null, dockerAnnotation.getName(), outputDir);
+            DockerGenerator.buildImage(null, dockerModel.getName(), outputDir);
         } catch (IOException e) {
-            out.println("Unable to write Dockerfile content to " + outputDir);
+            error.println("Unable to write Dockerfile content to " + outputDir);
         } catch (InterruptedException e) {
-            out.println("Unable to create docker images " + e.getMessage());
+            error.println("Unable to create docker images " + e.getMessage());
         }
     }
 

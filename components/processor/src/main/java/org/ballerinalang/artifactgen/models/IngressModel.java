@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * Kubernetes ingress annotations model class.
  */
-public class IngressAnnotation {
+public class IngressModel {
     private String name;
     private Map<String, String> labels;
     private String hostname;

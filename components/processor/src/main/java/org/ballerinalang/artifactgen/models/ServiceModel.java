@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * Kubernetes service annotations model class.
  */
-public class ServiceAnnotation {
+public class ServiceModel {
     private String name;
     private Map<String, String> labels;
     private String serviceType;

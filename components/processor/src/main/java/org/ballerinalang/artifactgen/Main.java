@@ -21,10 +21,11 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
+        //String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
+        String filePath = args[0];
         String userDir = System.getProperty("user.dir");
         String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File.separator;
-        out.println("target "+targetPath);
+        out.println("target " + targetPath);
         try {
             byte[] bFile = Files.readAllBytes(Paths.get(filePath));
             ProgramFileReader reader = new ProgramFileReader();
