@@ -167,19 +167,22 @@ public class ArtifactGenerator {
     private static DeploymentModel getDeploymentModel(AnnAttachmentInfo deploymentAnnotationInfo, String balxFilePath) {
         DeploymentModel deploymentModel = new DeploymentModel();
         String outputFileName = extractBalxName(balxFilePath);
-        String deploymentName = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAME) != null ?
+        String deploymentName = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAME) !=
+                null ?
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAME).getStringValue() :
                 outputFileName + "-deployment";
         deploymentModel.setName(deploymentName);
 
-        String namespace = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAMESPACE) != null ?
-                deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAMESPACE).getStringValue() :
+        String namespace = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAMESPACE) !=
+                null ?  deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAMESPACE)
+                .getStringValue() :
                 ArtifactGenConstants.DEPLOYMENT_NAMESPACE_DEFAULT;
         deploymentModel.setNamespace(namespace);
 
-        String imagePullPolicy = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE_PULL_POLICY)
-                != null ?
-                deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE_PULL_POLICY).getStringValue() :
+        String imagePullPolicy = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DEPLOYMENT_IMAGE_PULL_POLICY)
+                != null ?  deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DEPLOYMENT_IMAGE_PULL_POLICY).getStringValue() :
                 ArtifactGenConstants.DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT;
         deploymentModel.setImagePullPolicy(imagePullPolicy);
 

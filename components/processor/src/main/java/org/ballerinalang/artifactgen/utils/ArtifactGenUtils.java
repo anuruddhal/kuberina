@@ -56,6 +56,10 @@ public class ArtifactGenUtils {
         if (newFile.getParentFile().mkdirs()) {
             Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
         }
+        if (!newFile.exists()) {
+            Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
+        }
+
     }
 
     /**
