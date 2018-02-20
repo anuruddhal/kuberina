@@ -64,4 +64,11 @@ public class ArtifactGenConstants {
     public static final String SVC_SERVICE_TYPE = "serviceType";
     public static final String SVC_PORT = "port";
 
+    //Kubernetes ingress constants
+    public static final String INGRESS_NAME = "name";
+    public static final String INGRESS_LABELS = "labels";
+    public static final String INGRESS_HOSTNAME = "hostname";
+    public static final String INGRESS_PATH = "path";
+    public static final String INGRESS_CLASS = "ingressClass";
+
 }

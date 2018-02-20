@@ -21,9 +21,11 @@ package org.ballerinalang.artifactgen;
 import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.artifactgen.generators.DockerGenerator;
 import org.ballerinalang.artifactgen.generators.KubernetesDeploymentGenerator;
+import org.ballerinalang.artifactgen.generators.KubernetesIngressGenerator;
 import org.ballerinalang.artifactgen.generators.KubernetesServiceGenerator;
 import org.ballerinalang.artifactgen.models.DeploymentModel;
 import org.ballerinalang.artifactgen.models.DockerModel;
+import org.ballerinalang.artifactgen.models.IngressModel;
 import org.ballerinalang.artifactgen.models.ServiceModel;
 import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.ballerinalang.net.http.Constants;
@@ -50,8 +52,10 @@ public class ArtifactGenerator {
     private static final String KUBERNETES = "kubernetes";
     private static final String DEPLOYMENT_POSTFIX = "-deployment.yaml";
     private static final String SVC_POSTFIX = "-svc.yaml";
+    private static final String INGRESS_POSTFIX = "-ingress.yaml";
     private static final String SVC_TYPE_NODE_PORT = "NodePort";
     private static final String DOCKER_LATEST_TAG = ":latest";
+    private static final String INGRESS_CLASS_NGINX = "nginx";
 
     /**
      * Process docker annotations for ballerina Service.
@@ -178,6 +182,7 @@ public class ArtifactGenerator {
                 != null ?
                 svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_NAME).getStringValue() :
                 serviceInfo.getName();
+        //TODO: validate service name with regex.
         serviceModel.setName(serviceName.toLowerCase());
 
         String labels = svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_LABELS) != null ?
@@ -197,7 +202,7 @@ public class ArtifactGenerator {
         if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
             serviceModel.setPort(Math.toIntExact(portAttrVal.getIntValue()));
         } else {
-            //FIXME: default port hardcoded
+            //FIXME: default port hardcoded.
             serviceModel.setPort(9090);
         }
 
@@ -211,6 +216,62 @@ public class ArtifactGenerator {
             error.println("Unable to write service content to " + outputDir);
         } catch (ArtifactGenerationException e) {
             error.println("Unable to generate service  " + e.getMessage());
+        }
+        AnnAttachmentInfo ingressAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
+                (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE, ArtifactGenConstants.INGRESS_ANNOTATION);
+        if (ingressAnnotationInfo != null) {
+            processIngressAnnotationForService(serviceInfo, serviceModel, balxFilePath, outputDir);
+        }
+    }
+
+    /**
+     * Process ingress annotations for ballerina Service.
+     *
+     * @param serviceInfo  ServiceInfo Object
+     * @param balxFilePath ballerina file name
+     * @param outputDir    target output directory
+     */
+    public static void processIngressAnnotationForService(ServiceInfo serviceInfo, ServiceModel svc, String
+            balxFilePath, String outputDir) {
+        AnnAttachmentInfo ingressAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
+                (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE, ArtifactGenConstants.INGRESS_ANNOTATION);
+        IngressModel ingressModel = new IngressModel();
+
+        String ingressName = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_NAME)
+                != null ?
+                ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_NAME).getStringValue() :
+                serviceInfo.getName();
+        //TODO: validate ingress name with regex.
+        ingressModel.setName(ingressName.toLowerCase());
+        String labels = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_LABELS) != null ?
+                ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_LABELS).getStringValue() :
+                null;
+        ingressModel.setLabels(getLabels(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
+
+        String ingressClass = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_CLASS)
+                != null ?
+                ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_CLASS).getStringValue() :
+                INGRESS_CLASS_NGINX;
+        ingressModel.setIngressClass(ingressClass);
+
+        String hostname = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_HOSTNAME) != null ?
+                ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_HOSTNAME).getStringValue() :
+                serviceInfo.getName()+".com";
+        ingressModel.setHostname(hostname.toLowerCase());
+
+        ingressModel.setServiceName(svc.getName());
+        ingressModel.setServicePort(svc.getPort());
+
+        out.println(ingressModel);
+        try {
+            String svcContent = KubernetesIngressGenerator.generate(ingressModel);
+            ArtifactGenUtils.writeToFile(svcContent, outputDir + File.separator + KUBERNETES + File
+                    .separator + serviceInfo.getName() + INGRESS_POSTFIX);
+            out.println("Ingress yaml generated.");
+        } catch (IOException e) {
+            error.println("Unable to write ingress content to " + outputDir);
+        } catch (ArtifactGenerationException e) {
+            error.println("Unable to generate ingress content  " + e.getMessage());
         }
     }
 
@@ -255,7 +316,7 @@ public class ArtifactGenerator {
                 ArtifactGenConstants.DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT;
         deploymentModel.setImagePullPolicy(imagePullPolicy);
 
-        //TODO:handle liveness probe
+        //TODO:handle liveness probe.
         String liveness = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_LIVENESS)
                 != null ?
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_LIVENESS).getStringValue() :
