@@ -57,4 +57,11 @@ public class ArtifactGenConstants {
     public static final String DEPLOYMENT_NAMESPACE_DEFAULT = "default";
     public static final String DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT = "IfNotPresent";
     public static final String DEPLOYMENT_LIVENESS_DISABLE = "disable";
+
+    //Kubernetes service constants
+    public static final String SVC_NAME = "name";
+    public static final String SVC_LABELS = "labels";
+    public static final String SVC_SERVICE_TYPE = "serviceType";
+    public static final String SVC_PORT = "port";
+
 }

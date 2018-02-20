@@ -1,5 +1,6 @@
 package org.ballerinalang.artifactgen;
 
+import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.ballerinalang.util.codegen.AnnAttachmentInfo;
 import org.ballerinalang.util.codegen.PackageInfo;
 import org.ballerinalang.util.codegen.ProgramFile;
@@ -21,8 +22,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
-        String filePath = args[0];
+        String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
+        //String filePath = args[0];
         String userDir = System.getProperty("user.dir");
         try {
             byte[] bFile = Files.readAllBytes(Paths.get(filePath));
@@ -53,36 +54,41 @@ public class Main {
                                     ArtifactGenConstants.DOCKER_ANNOTATION);
 
                     if (deploymentAnnotation != null) {
-                        out.println("Deployment annotation detected.");
-                        deploymentCount += 1;
-                        if (deploymentCount > 1) {
-                            out.println("Warning : multiple deployment annotations detected. Ignoring annotation in " +
-                                    "service: " + serviceInfo.getName());
-                            continue;
+                        if (deploymentCount < 1) {
+                            deploymentCount += 1;
+                            out.println("Processing deployment{} for : " + serviceInfo.getName());
+                            String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
+                                    .extractBalxName(filePath)
+                                    + File.separator;
+                            ArtifactGenerator.processDeploymentAnnotationForService(serviceInfo, filePath, targetPath);
+
                         }
-                        out.println("Deployment " + deploymentAnnotation.getAttributeValueMap());
-                        String targetPath = userDir + File.separator + "target" + File.separator + serviceInfo
-                                .getName() + File.separator;
-                        ArtifactGenerator.processDeploymentAnnotationForService(serviceInfo, filePath, targetPath);
+                        out.println("Warning : multiple deployment{} annotations detected. Ignoring annotation in " +
+                                "service: " + serviceInfo.getName());
                     }
                     if (serviceAnnotation != null) {
-                        out.println("Service " + serviceAnnotation.getAttributeValueMap());
-                    }
-                    if (ingressAnnotation != null) {
-                        out.println("Ingress " + ingressAnnotation.getAttributeValueMap());
+                        out.println("Processing svc{} for :" + serviceInfo.getName());
+                        String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
+                                .extractBalxName(filePath)
+                                + File.separator;
+                        ArtifactGenerator.processSvcAnnotationForService(serviceInfo, filePath, targetPath);
+
+                        // Process Ingress Annotation only if svc annotation is present
+                        if (ingressAnnotation != null) {
+                            out.println("Ingress " + ingressAnnotation.getAttributeValueMap());
+                        }
                     }
                     if (dockerAnnotation != null) {
-                        out.println("Docker annotation detected.");
-                        dockerCount += 1;
-                        if (dockerCount > 1) {
-                            out.println("Warning : multiple docker annotations detected. Ignoring annotation in " +
-                                    "service: " + serviceInfo.getName());
-                            continue;
+                        if (dockerCount < 1) {
+                            out.println("Processing docker{} for : " + serviceInfo.getName());
+                            dockerCount += 1;
+                            String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File
+                                    .separator;
+                            out.println("Output Directory " + targetPath);
+                            ArtifactGenerator.processDockerAnnotationForService(serviceInfo, filePath, targetPath);
                         }
-                        String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File
-                                .separator;
-                        out.println("Output Directory " + targetPath);
-                        ArtifactGenerator.processDockerAnnotationForService(serviceInfo, filePath, targetPath);
+                        out.println("Warning : multiple docker{} annotations detected. Ignoring annotation in " +
+                                "service: " + serviceInfo.getName());
                     }
 
                 }

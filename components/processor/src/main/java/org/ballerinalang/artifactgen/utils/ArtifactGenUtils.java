@@ -45,7 +45,7 @@ public class ArtifactGenUtils {
     private static final PrintStream error = System.err;
 
     /**
-     * Write content to a File.
+     * Write content to a File. Create the required directories if they don't not exists.
      *
      * @param context        context of the file
      * @param targetFilePath target file path
@@ -103,5 +103,10 @@ public class ArtifactGenUtils {
         //TODO: remove this with actual port(s)
         ports.add(9090);
         return ports;
+    }
+
+    public static String extractBalxName(String balxFilePath) {
+        return balxFilePath.substring(balxFilePath.lastIndexOf(File.separator) + 1, balxFilePath.lastIndexOf("" +
+                ".balx"));
     }
 }

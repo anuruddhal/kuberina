@@ -51,8 +51,6 @@ RUN mkdir -p /ballerina/files \
 ENV BALLERINA_HOME /ballerina/runtime
 ENV PATH $BALLERINA_HOME/bin:$PATH
 
-# Where Ballerina files and archives should be copied to.
-VOLUME /ballerina/files
 
 WORKDIR /home/ballerina
 
