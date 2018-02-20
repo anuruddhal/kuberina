@@ -38,12 +38,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Process Annotations.
+ * Process Annotations and generate Artifacts.
  */
 public class ArtifactGenerator {
 
@@ -183,7 +184,7 @@ public class ArtifactGenerator {
                 svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_NAME).getStringValue() :
                 serviceInfo.getName();
         //TODO: validate service name with regex.
-        serviceModel.setName(serviceName.toLowerCase());
+        serviceModel.setName(serviceName.toLowerCase(Locale.ENGLISH));
 
         String labels = svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_LABELS) != null ?
                 svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_LABELS).getStringValue() :
@@ -202,7 +203,7 @@ public class ArtifactGenerator {
         if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
             serviceModel.setPort(Math.toIntExact(portAttrVal.getIntValue()));
         } else {
-            //FIXME: default port hardcoded.
+            //TODO: default port hardcoded.
             serviceModel.setPort(9090);
         }
 
@@ -217,6 +218,7 @@ public class ArtifactGenerator {
         } catch (ArtifactGenerationException e) {
             error.println("Unable to generate service  " + e.getMessage());
         }
+        // Process Ingress Annotation only if svc annotation is present
         AnnAttachmentInfo ingressAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
                 (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE, ArtifactGenConstants.INGRESS_ANNOTATION);
         if (ingressAnnotationInfo != null) {
@@ -231,7 +233,7 @@ public class ArtifactGenerator {
      * @param balxFilePath ballerina file name
      * @param outputDir    target output directory
      */
-    public static void processIngressAnnotationForService(ServiceInfo serviceInfo, ServiceModel svc, String
+    private static void processIngressAnnotationForService(ServiceInfo serviceInfo, ServiceModel svc, String
             balxFilePath, String outputDir) {
         AnnAttachmentInfo ingressAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
                 (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE, ArtifactGenConstants.INGRESS_ANNOTATION);
@@ -242,7 +244,7 @@ public class ArtifactGenerator {
                 ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_NAME).getStringValue() :
                 serviceInfo.getName();
         //TODO: validate ingress name with regex.
-        ingressModel.setName(ingressName.toLowerCase());
+        ingressModel.setName(ingressName.toLowerCase(Locale.ENGLISH));
         String labels = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_LABELS) != null ?
                 ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_LABELS).getStringValue() :
                 null;
@@ -256,8 +258,8 @@ public class ArtifactGenerator {
 
         String hostname = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_HOSTNAME) != null ?
                 ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_HOSTNAME).getStringValue() :
-                serviceInfo.getName()+".com";
-        ingressModel.setHostname(hostname.toLowerCase());
+                serviceInfo.getName() + ".com";
+        ingressModel.setHostname(hostname.toLowerCase(Locale.ENGLISH));
 
         ingressModel.setServiceName(svc.getName());
         ingressModel.setServicePort(svc.getPort());
@@ -342,8 +344,8 @@ public class ArtifactGenerator {
         try {
             ArtifactGenUtils.writeToFile(dockerContent, outputDir + File.separator + "Dockerfile");
             out.println("Dockerfile generation completed.");
-            ArtifactGenUtils.copyFile(balxFilePath, outputDir + File.separator + ArtifactGenUtils.extractBalxName(balxFilePath) +
-                    ".balx");
+            ArtifactGenUtils.copyFile(balxFilePath, outputDir + File.separator + ArtifactGenUtils.extractBalxName
+                    (balxFilePath) + ".balx");
             if (dockerModel.isImageBuild()) {
                 DockerGenerator.buildImage(null, dockerModel.getName(), outputDir);
                 out.println("Docker image generation completed.");

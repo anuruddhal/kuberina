@@ -22,8 +22,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
-        //String filePath = args[0];
+        //String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
+        String filePath = args[0];
         String userDir = System.getProperty("user.dir");
         try {
             byte[] bFile = Files.readAllBytes(Paths.get(filePath));
@@ -46,9 +46,6 @@ public class Main {
                     AnnAttachmentInfo serviceAnnotation = serviceInfo.getAnnotationAttachmentInfo
                             (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE,
                                     ArtifactGenConstants.SERVICE_ANNOTATION);
-                    AnnAttachmentInfo ingressAnnotation = serviceInfo.getAnnotationAttachmentInfo
-                            (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE,
-                                    ArtifactGenConstants.INGRESS_ANNOTATION);
                     AnnAttachmentInfo dockerAnnotation = serviceInfo.getAnnotationAttachmentInfo
                             (ArtifactGenConstants.DOCKER_ANNOTATION_PACKAGE,
                                     ArtifactGenConstants.DOCKER_ANNOTATION);
@@ -61,7 +58,6 @@ public class Main {
                                     .extractBalxName(filePath)
                                     + File.separator;
                             ArtifactGenerator.processDeploymentAnnotationForService(serviceInfo, filePath, targetPath);
-
                         }
                         out.println("Warning : multiple deployment{} annotations detected. Ignoring annotation in " +
                                 "service: " + serviceInfo.getName());
@@ -72,11 +68,7 @@ public class Main {
                                 .extractBalxName(filePath)
                                 + File.separator;
                         ArtifactGenerator.processSvcAnnotationForService(serviceInfo, filePath, targetPath);
-
                         // Process Ingress Annotation only if svc annotation is present
-                        if (ingressAnnotation != null) {
-                            out.println("Ingress " + ingressAnnotation.getAttributeValueMap());
-                        }
                     }
                     if (dockerAnnotation != null) {
                         if (dockerCount < 1) {
