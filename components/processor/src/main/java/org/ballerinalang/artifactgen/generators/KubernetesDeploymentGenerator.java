@@ -23,6 +23,8 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
@@ -33,6 +35,7 @@ import org.ballerinalang.artifactgen.models.DeploymentModel;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Generates kubernetes deployment from annotations.
@@ -101,7 +104,20 @@ public class KubernetesDeploymentGenerator {
                 .withImage(deploymentModel.getImage())
                 .withImagePullPolicy(deploymentModel.getImagePullPolicy())
                 .withPorts(containerPorts)
+                .withEnv(populateEnvVar(deploymentModel.getEnv()))
                 .build();
+    }
+
+    private static List<EnvVar> populateEnvVar(Map<String, String> envMap) {
+        List<EnvVar> envVars = new ArrayList<>();
+        if(envMap == null){
+            return  envVars;
+        }
+        envMap.forEach((k, v) -> {
+            EnvVar envVar = new EnvVarBuilder().withName(k).withValue(v).build();
+            envVars.add(envVar);
+        });
+        return envVars;
     }
 }
 

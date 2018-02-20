@@ -10,6 +10,7 @@ package ballerina.kubernetes;
 @Field {value:"imagePullPolicy: Docker image pull policy"}
 @Field {value:"namespace: Kubernetes namespace"}
 @Field {value:"image: Docker image with tag"}
+@Field {value:"envVars: Environment varialbes for container"}
 @Field {value:"imageBuild: Docker image to be build or not"}
 public annotation deployment attach service, function {
     string name;
@@ -21,6 +22,7 @@ public annotation deployment attach service, function {
     string imagePullPolicy;
     string namespace;
     string image;
+    string env;
     boolean imageBuild;
 }
 

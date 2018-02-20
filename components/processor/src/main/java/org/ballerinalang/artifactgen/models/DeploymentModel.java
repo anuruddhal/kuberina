@@ -33,6 +33,7 @@ public class DeploymentModel {
     private String imagePullPolicy;
     private String namespace;
     private String image;
+    private Map<String, String> env;
     private List<Integer> ports;
 
     public String getName() {
@@ -115,6 +116,14 @@ public class DeploymentModel {
         this.ports = ports;
     }
 
+    public Map<String, String> getEnv() {
+        return env;
+    }
+
+    public void setEnv(Map<String, String> env) {
+        this.env = env;
+    }
+
     @Override
     public String toString() {
         return "DeploymentModel{" +
@@ -127,6 +136,7 @@ public class DeploymentModel {
                 ", imagePullPolicy='" + imagePullPolicy + '\'' +
                 ", namespace='" + namespace + '\'' +
                 ", image='" + image + '\'' +
+                ", env=" + env +
                 ", ports=" + ports +
                 '}';
     }

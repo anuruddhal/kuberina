@@ -189,7 +189,7 @@ public class ArtifactGenerator {
         String labels = svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_LABELS) != null ?
                 svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_LABELS).getStringValue() :
                 null;
-        serviceModel.setLabels(getLabels(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
+        serviceModel.setLabels(getEnvVars(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
 
         String serviceType = svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_SERVICE_TYPE)
                 != null ?
@@ -248,7 +248,7 @@ public class ArtifactGenerator {
         String labels = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_LABELS) != null ?
                 ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_LABELS).getStringValue() :
                 null;
-        ingressModel.setLabels(getLabels(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
+        ingressModel.setLabels(getEnvVars(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
 
         String ingressClass = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_CLASS)
                 != null ?
@@ -284,16 +284,33 @@ public class ArtifactGenerator {
      * @param outputFileName output file name parameter added to the selector.
      * @return Map of labels with selector.
      */
-    private static Map<String, String> getLabels(String labels, String outputFileName) {
+    private static Map<String, String> getEnvVars(String labels, String outputFileName) {
         Map<String, String> labelMap = new HashMap<>();
-        labelMap.put(ArtifactGenConstants.KUBERNETES_SELECTOR_KEY, outputFileName);
         if (labels != null) {
             labelMap = Pattern.compile("\\s*,\\s*")
                     .splitAsStream(labels.trim())
                     .map(s -> s.split(":", 2))
                     .collect(Collectors.toMap(a -> a[0], a -> a.length > 1 ? a[1] : ""));
         }
+        labelMap.put(ArtifactGenConstants.KUBERNETES_SELECTOR_KEY, outputFileName);
         return labelMap;
+    }
+
+    /**
+     * Generate env map by splitting the env string.
+     *
+     * @param env env string.
+     * @return Map of env variables.
+     */
+    private static Map<String, String> getEnvVars(String env) {
+        if (env == null) {
+            return null;
+        }
+        Map<String, String> envMap = Pattern.compile("\\s*,\\s*")
+                .splitAsStream(env.trim())
+                .map(s -> s.split(":", 2))
+                .collect(Collectors.toMap(a -> a[0], a -> a.length > 1 ? a[1] : ""));
+        return envMap;
     }
 
     private static DeploymentModel getDeploymentModel(AnnAttachmentInfo deploymentAnnotationInfo, String balxFilePath) {
@@ -334,7 +351,13 @@ public class ArtifactGenerator {
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_LABELS).getStringValue() :
                 null;
 
-        deploymentModel.setLabels(getLabels(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
+        deploymentModel.setLabels(getEnvVars(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
+
+        String envVars = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_ENV_VARS) != null ?
+                deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_ENV_VARS).getStringValue() :
+                null;
+
+        deploymentModel.setEnv(getEnvVars(envVars));
 
         return deploymentModel;
     }
