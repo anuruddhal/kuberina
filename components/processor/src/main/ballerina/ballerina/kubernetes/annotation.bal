@@ -38,6 +38,44 @@ public annotation svc attach service {
     int port;
 }
 
+@Description {value:"Kubernetes external deployment configuration"}
+@Field {value:"name: Name of the deployment"}
+@Field {value:"labels: Labels for deployment"}
+@Field {value:"replicas: Number of replicas"}
+@Field {value:"liveness: Enable or disable liveness probe"}
+@Field {value:"initialDelaySeconds: Initial delay in seconds before performing the first probe"}
+@Field {value:"periodSeconds: Liveness probe interval"}
+@Field {value:"imagePullPolicy: Docker image pull policy"}
+@Field {value:"namespace: Kubernetes namespace"}
+@Field {value:"image: Docker image with tag"}
+@Field {value:"envVars: Environment varialbes for container"}
+@Field {value:"sidecar: Attach this to main deployment as sidecar"}
+public annotation externalDeployment attach service, function {
+    string name;
+    string labels;
+    int replicas;
+    string liveness;
+    int initialDelaySeconds;
+    int periodSeconds;
+    string imagePullPolicy;
+    string namespace;
+    string image;
+    string env;
+    boolean sidecar;
+}
+
+@Description {value:"Kubernetes service configuration"}
+@Field {value:"name: Name of the Service"}
+@Field {value:"labels: Labels for service"}
+@Field {value:"serviceType: Service type of the service"}
+@Field {value:"port: Service port"}
+public annotation externalSvc attach service {
+    string name;
+    string labels;
+    string serviceType;
+    int port;
+}
+
 @Description {value:"Kubernetes ingress configuration"}
 @Field {value:"name: Name of the Service"}
 @Field {value:"labels: Labels for service"}
