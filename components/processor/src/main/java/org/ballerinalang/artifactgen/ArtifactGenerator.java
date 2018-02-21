@@ -28,7 +28,7 @@ import org.ballerinalang.artifactgen.models.DockerModel;
 import org.ballerinalang.artifactgen.models.IngressModel;
 import org.ballerinalang.artifactgen.models.ServiceModel;
 import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
-import org.ballerinalang.net.http.Constants;
+import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.util.codegen.AnnAttachmentInfo;
 import org.ballerinalang.util.codegen.AnnAttributeValue;
 import org.ballerinalang.util.codegen.ServiceInfo;
@@ -147,9 +147,8 @@ public class ArtifactGenerator {
                 .getBooleanValue();
         deploymentModel.setImage(image);
         DockerModel dockerModel = new DockerModel();
-        String imageNameWithoutTag = image.substring(0, image.lastIndexOf(":"));
         String imageTag = image.substring(image.lastIndexOf(":") + 1, image.length());
-        dockerModel.setName(imageNameWithoutTag);
+        dockerModel.setName(image);
         dockerModel.setTag(imageTag);
         String balxFileName = ArtifactGenUtils.extractBalxName(balxFilePath) + BALX;
         dockerModel.setBalxFileName(balxFileName);
@@ -207,9 +206,9 @@ public class ArtifactGenerator {
                 SVC_TYPE_NODE_PORT;
         serviceModel.setServiceType(serviceType);
         serviceModel.setSelector(ArtifactGenUtils.extractBalxName(balxFilePath));
-        AnnAttachmentInfo annotationInfo = serviceInfo.getAnnotationAttachmentInfo(Constants
-                .HTTP_PACKAGE_PATH, Constants.ANN_NAME_CONFIG);
-        AnnAttributeValue portAttrVal = annotationInfo.getAttributeValue(Constants.ANN_CONFIG_ATTR_PORT);
+        AnnAttachmentInfo annotationInfo = serviceInfo.getAnnotationAttachmentInfo(HttpConstants
+                .HTTP_PACKAGE_PATH, HttpConstants.ANN_NAME_CONFIG);
+        AnnAttributeValue portAttrVal = annotationInfo.getAttributeValue(HttpConstants.ANN_CONFIG_ATTR_PORT);
         if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
             serviceModel.setPort(Math.toIntExact(portAttrVal.getIntValue()));
         } else {

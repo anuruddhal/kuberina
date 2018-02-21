@@ -19,7 +19,7 @@
 package org.ballerinalang.artifactgen.utils;
 
 import org.ballerinalang.artifactgen.ArtifactGenConstants;
-import org.ballerinalang.net.http.Constants;
+import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.util.codegen.AnnAttachmentInfo;
 import org.ballerinalang.util.codegen.AnnAttributeValue;
 import org.ballerinalang.util.codegen.ServiceInfo;
@@ -96,9 +96,9 @@ public class ArtifactGenUtils {
 
     public static List<Integer> extractPorts(ServiceInfo serviceInfo) {
         List<Integer> ports = new ArrayList<>();
-        AnnAttachmentInfo annotationInfo = serviceInfo.getAnnotationAttachmentInfo(Constants
-                .HTTP_PACKAGE_PATH, Constants.ANN_NAME_CONFIG);
-        AnnAttributeValue portAttrVal = annotationInfo.getAttributeValue(Constants.ANN_CONFIG_ATTR_PORT);
+        AnnAttachmentInfo annotationInfo = serviceInfo.getAnnotationAttachmentInfo(HttpConstants
+                .HTTP_PACKAGE_PATH, HttpConstants.ANN_NAME_CONFIG);
+        AnnAttributeValue portAttrVal = annotationInfo.getAttributeValue(HttpConstants.ANN_CONFIG_ATTR_PORT);
         if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
             ports.add(Math.toIntExact(portAttrVal.getIntValue()));
         }
