@@ -143,8 +143,8 @@ public class ArtifactGenerator {
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE).getStringValue() :
                 ArtifactGenUtils.extractBalxName(balxFilePath) + DOCKER_LATEST_TAG;
         boolean imageBuild = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE_BUILD)
-                != null && deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE_BUILD)
-                .getBooleanValue();
+                == null || deploymentAnnotationInfo.getAttributeValue(
+                ArtifactGenConstants.DEPLOYMENT_IMAGE_BUILD).getBooleanValue();
         deploymentModel.setImage(image);
         DockerModel dockerModel = new DockerModel();
         String imageTag = image.substring(image.lastIndexOf(":") + 1, image.length());
@@ -389,8 +389,9 @@ public class ArtifactGenerator {
             ArtifactGenUtils.copyFile(balxFilePath, outputDir + File.separator + ArtifactGenUtils.extractBalxName
                     (balxFilePath) + BALX);
             if (dockerModel.isImageBuild()) {
+                out.println("Building docker image ....");
                 DockerGenerator.buildImage(null, dockerModel.getName(), outputDir);
-                out.println("Docker image generation completed.");
+                out.println("Docker image building completed.");
             }
         } catch (IOException e) {
             error.println("Unable to write Dockerfile content to " + outputDir);

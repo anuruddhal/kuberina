@@ -23,7 +23,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //String filePath = "/Users/anuruddha/Repos/ballerina-k8s-demo/sample6/foodstore.balx";
+        //String filePath = "/Users/anuruddha/Repos/ballerina-k8s-demo/foodstore/foodstore.balx";
         String filePath = args[0];
         String userDir = new File(filePath).getParentFile().getAbsolutePath();
         try {
