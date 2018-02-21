@@ -57,6 +57,7 @@ public class ArtifactGenerator {
     private static final String SVC_TYPE_NODE_PORT = "NodePort";
     private static final String DOCKER_LATEST_TAG = ":latest";
     private static final String INGRESS_CLASS_NGINX = "nginx";
+    private static final String INGRESS_HOSTNAME_POSTFIX = ".com";
 
     /**
      * Process docker annotations for ballerina Service.
@@ -258,9 +259,19 @@ public class ArtifactGenerator {
 
         String hostname = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_HOSTNAME) != null ?
                 ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_HOSTNAME).getStringValue() :
-                serviceInfo.getName() + ".com";
+                serviceInfo.getName() + INGRESS_HOSTNAME_POSTFIX;
+        //TODO:validate hostname
         ingressModel.setHostname(hostname.toLowerCase(Locale.ENGLISH));
 
+        String path = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_PATH) != null ?
+                ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_PATH).getStringValue() :
+                "/";
+        ingressModel.setPath(path);
+
+        String targetPath = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_TARGET_PATH) != null ?
+                ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_TARGET_PATH).getStringValue() :
+                null;
+        ingressModel.setTargetPath(targetPath);
         ingressModel.setServiceName(svc.getName());
         ingressModel.setServicePort(svc.getPort());
 

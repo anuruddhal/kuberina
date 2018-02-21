@@ -110,8 +110,8 @@ public class KubernetesDeploymentGenerator {
 
     private static List<EnvVar> populateEnvVar(Map<String, String> envMap) {
         List<EnvVar> envVars = new ArrayList<>();
-        if(envMap == null){
-            return  envVars;
+        if (envMap == null) {
+            return envVars;
         }
         envMap.forEach((k, v) -> {
             EnvVar envVar = new EnvVarBuilder().withName(k).withValue(v).build();

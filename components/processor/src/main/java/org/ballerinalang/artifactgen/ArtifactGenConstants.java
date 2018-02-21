@@ -70,6 +70,7 @@ public class ArtifactGenConstants {
     public static final String INGRESS_LABELS = "labels";
     public static final String INGRESS_HOSTNAME = "hostname";
     public static final String INGRESS_PATH = "path";
+    public static final String INGRESS_TARGET_PATH = "targetPath";
     public static final String INGRESS_CLASS = "ingressClass";
 
 }

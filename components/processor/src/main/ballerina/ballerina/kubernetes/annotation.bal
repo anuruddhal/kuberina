@@ -43,11 +43,13 @@ public annotation svc attach service {
 @Field {value:"labels: Labels for service"}
 @Field {value:"hostname: Host name of the ingress"}
 @Field {value:"path: Resource path"}
+@Field {value:"targetPath: Target path for url rewrite"}
 @Field {value:"ingressClass: Ingress class"}
 public annotation ingress attach service {
     string name;
     string labels;
     string hostname;
     string path;
+    string targetPath;
     string ingressClass;
 }

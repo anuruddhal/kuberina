@@ -7,6 +7,7 @@ package ballerina.docker;
 @Field {value:"username: Username for docker registry"}
 @Field {value:"password: Password for docker registry"}
 @Field {value:"push: Push to remote registry"}
+@Field {value:"imageBuild: Build docker image"}
 public annotation configuration attach service, function {
     string name;
     string registry;
@@ -14,4 +15,5 @@ public annotation configuration attach service, function {
     string username;
     string password;
     boolean push;
+    boolean imageBuild;
 }

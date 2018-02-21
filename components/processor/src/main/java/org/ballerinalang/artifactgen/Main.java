@@ -22,8 +22,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
-        //String filePath = args[0];
+        //String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
+        String filePath = args[0];
         String userDir = System.getProperty("user.dir");
         try {
             byte[] bFile = Files.readAllBytes(Paths.get(filePath));
@@ -33,13 +33,11 @@ public class Main {
             PackageInfo packageInfos[] = programFile.getPackageInfoEntries();
             ServiceInfo serviceInfos[];
 
-            for (int i = 0; i < packageInfos.length; i++) {
-                PackageInfo packageInfo = packageInfos[i];
+            for (PackageInfo packageInfo : packageInfos) {
                 serviceInfos = packageInfo.getServiceInfoEntries();
                 int dockerCount = 0;
                 int deploymentCount = 0;
-                for (int j = 0; j < serviceInfos.length; j++) {
-                    ServiceInfo serviceInfo = serviceInfos[j];
+                for (ServiceInfo serviceInfo : serviceInfos) {
                     AnnAttachmentInfo deploymentAnnotation = serviceInfo.getAnnotationAttachmentInfo
                             (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE,
                                     ArtifactGenConstants.DEPLOYMENT_ANNOTATION);
