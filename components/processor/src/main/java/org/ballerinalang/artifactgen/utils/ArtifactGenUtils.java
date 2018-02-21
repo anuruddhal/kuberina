@@ -53,13 +53,15 @@ public class ArtifactGenUtils {
      */
     public static void writeToFile(String context, String targetFilePath) throws IOException {
         File newFile = new File(targetFilePath);
+        if (newFile.exists() && newFile.delete()) {
+            Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
+            return;
+        }
         if (newFile.getParentFile().mkdirs()) {
             Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
+            return;
         }
-        if (!newFile.exists()) {
-            Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
-        }
-
+        Files.write(Paths.get(targetFilePath), context.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

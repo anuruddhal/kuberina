@@ -19,12 +19,13 @@ import java.nio.file.Paths;
  */
 public class Main {
     private static final PrintStream out = System.out;
+    private static final PrintStream error = System.err;
 
     public static void main(String[] args) {
 
-        //String filePath = "/Users/anuruddha/Desktop/workspace/hello/sample/hello-world.balx";
-        String filePath = args[0];
-        String userDir = System.getProperty("user.dir");
+        String filePath = "/Users/anuruddha/Repos/ballerina-k8s-demo/sample4/hello-world-k8s.balx";
+        //String filePath = args[0];
+        String userDir = new File(filePath).getParentFile().getAbsolutePath();
         try {
             byte[] bFile = Files.readAllBytes(Paths.get(filePath));
             ProgramFileReader reader = new ProgramFileReader();
@@ -56,9 +57,10 @@ public class Main {
                                     .extractBalxName(filePath)
                                     + File.separator;
                             ArtifactGenerator.processDeploymentAnnotationForService(serviceInfo, filePath, targetPath);
+                        } else {
+                            out.println("Warning : multiple deployment{} annotations detected. Ignoring annotation in" +
+                                    " service: " + serviceInfo.getName());
                         }
-                        out.println("Warning : multiple deployment{} annotations detected. Ignoring annotation in " +
-                                "service: " + serviceInfo.getName());
                     }
                     if (serviceAnnotation != null) {
                         out.println("Processing svc{} for :" + serviceInfo.getName());
@@ -66,7 +68,6 @@ public class Main {
                                 .extractBalxName(filePath)
                                 + File.separator;
                         ArtifactGenerator.processSvcAnnotationForService(serviceInfo, filePath, targetPath);
-                        // Process Ingress Annotation only if svc annotation is present
                     }
                     if (dockerAnnotation != null) {
                         if (dockerCount < 1) {
@@ -76,15 +77,16 @@ public class Main {
                                     .separator;
                             out.println("Output Directory " + targetPath);
                             ArtifactGenerator.processDockerAnnotationForService(serviceInfo, filePath, targetPath);
+                        } else {
+                            out.println("warning : multiple docker{} annotations detected. Ignoring annotation in " +
+                                    "service: " + serviceInfo.getName());
                         }
-                        out.println("Warning : multiple docker{} annotations detected. Ignoring annotation in " +
-                                "service: " + serviceInfo.getName());
                     }
 
                 }
             }
         } catch (IOException e) {
-            out.println(e.getMessage());
+            error.println("Error: error occured while reading balx file" + e.getMessage());
         }
 
 

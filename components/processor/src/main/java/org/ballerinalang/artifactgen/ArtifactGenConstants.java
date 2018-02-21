@@ -42,6 +42,7 @@ public class ArtifactGenConstants {
     public static final String DOCKER_PASSWORD = "password";
     public static final String DOCKER_PUSH = "push";
     public static final String DOCKER_TAG_LATEST = "latest";
+    public static final String DOCKER_IMAGE_BUILD = "imageBuild";
 
     //Deployment annotation constants
     public static final String DEPLOYMENT_NAME = "name";

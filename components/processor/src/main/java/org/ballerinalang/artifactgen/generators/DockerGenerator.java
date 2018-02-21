@@ -63,7 +63,7 @@ public class DockerGenerator {
         VelocityContext context = new VelocityContext();
         context.put(VELOCITY_FILE_NAME_VARIABLE, dockerModel.getBalxFileName());
         context.put(VELOCITY_SERVICE_VARIABLE, dockerModel.isService());
-        context.put(VELOCITY_FILE_PATH_VARIABLE, dockerModel.getBalxFilePath());
+        context.put(VELOCITY_FILE_PATH_VARIABLE, dockerModel.getBalxFileName());
         if (dockerModel.isService()) {
             context.put("ports", dockerModel.getPorts());
         }

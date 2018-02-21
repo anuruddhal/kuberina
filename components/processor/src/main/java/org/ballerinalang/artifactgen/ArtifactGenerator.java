@@ -51,6 +51,8 @@ public class ArtifactGenerator {
     private static final PrintStream out = System.out;
     private static final PrintStream error = System.err;
     private static final String KUBERNETES = "kubernetes";
+    private static final String DOCKER = "docker";
+    private static final String BALX = ".balx";
     private static final String DEPLOYMENT_POSTFIX = "-deployment.yaml";
     private static final String SVC_POSTFIX = "-svc.yaml";
     private static final String INGRESS_POSTFIX = "-ingress.yaml";
@@ -75,13 +77,9 @@ public class ArtifactGenerator {
         }
         DockerModel dockerModel = new DockerModel();
         dockerModel.setService(true);
-        String nameValue = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME) != null ?
-                dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME).getStringValue() :
-                ArtifactGenUtils.extractBalxName(balxFilePath);
-        dockerModel.setName(nameValue);
-        String balxFileName = nameValue + ".balx";
+        String balxFileName = ArtifactGenUtils.extractBalxName(balxFilePath) + BALX;
         dockerModel.setBalxFileName(balxFileName);
-        dockerModel.setBalxFilePath(balxFileName);
+        dockerModel.setBalxFilePath(balxFilePath);
         String tag = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_TAG) != null ?
                 dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_TAG).getStringValue() :
                 ArtifactGenConstants.DOCKER_TAG_LATEST;
@@ -101,12 +99,23 @@ public class ArtifactGenerator {
                 .DOCKER_PASSWORD).getStringValue() : null;
         dockerModel.setPassword(password);
 
+        boolean imageBuild = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DOCKER_IMAGE_BUILD) == null || dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DOCKER_IMAGE_BUILD).getBooleanValue();
+        dockerModel.setImageBuild(imageBuild);
+
         boolean push = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_PUSH) != null && dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_PUSH).getBooleanValue();
         dockerModel.setPush(push);
         dockerModel.setPorts(ArtifactGenUtils.extractPorts(serviceInfo));
-        dockerModel.setImageBuild(true);
+
+        String nameValue = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME) != null ?
+                dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME).getStringValue() :
+                ArtifactGenUtils.extractBalxName(balxFilePath);
+        nameValue = (registry != null) ? registry + "/" + nameValue + ":" + tag : nameValue + ":" + tag;
+        dockerModel.setName(nameValue);
+
         out.println(dockerModel);
         createDockerArtifacts(dockerModel, balxFilePath, outputDir);
 
@@ -142,14 +151,14 @@ public class ArtifactGenerator {
         String imageTag = image.substring(image.lastIndexOf(":") + 1, image.length());
         dockerModel.setName(imageNameWithoutTag);
         dockerModel.setTag(imageTag);
-        String balxFileName = ArtifactGenUtils.extractBalxName(balxFilePath) + ".balx";
+        String balxFileName = ArtifactGenUtils.extractBalxName(balxFilePath) + BALX;
         dockerModel.setBalxFileName(balxFileName);
         dockerModel.setBalxFilePath(balxFileName);
         dockerModel.setPorts(ports);
         dockerModel.setService(true);
         dockerModel.setImageBuild(imageBuild);
         createDockerArtifacts(dockerModel, balxFilePath, outputDir + File.separator + KUBERNETES + File
-                .separator + "docker");
+                .separator + DOCKER);
         out.println(deploymentModel);
         try {
             String deploymentContent = KubernetesDeploymentGenerator.generate(deploymentModel);
@@ -379,7 +388,7 @@ public class ArtifactGenerator {
             ArtifactGenUtils.writeToFile(dockerContent, outputDir + File.separator + "Dockerfile");
             out.println("Dockerfile generation completed.");
             ArtifactGenUtils.copyFile(balxFilePath, outputDir + File.separator + ArtifactGenUtils.extractBalxName
-                    (balxFilePath) + ".balx");
+                    (balxFilePath) + BALX);
             if (dockerModel.isImageBuild()) {
                 DockerGenerator.buildImage(null, dockerModel.getName(), outputDir);
                 out.println("Docker image generation completed.");
