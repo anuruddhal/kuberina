@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM anuruddhal/ballerina-base:latest
+FROM ballerina/b7a:latest
 MAINTAINER ballerina Maintainers "dev@ballerina.io"
 
 COPY ${filePath} /home/ballerina
