@@ -460,20 +460,13 @@ class ArtifactGenerator {
     }
 
     private static void printDockerInstructions(String dockerImageName) {
-        printInstruction("################################################################# ");
-        printInstruction("");
         printInstruction("Run following command to start docker container: ");
         printInstruction("docker run -d -p " + dockerImageName);
-        printInstruction("");
-        printInstruction("################################################################# ");
+
     }
 
     private static void printKubernetesInstructions(String outputDir) {
-        printInstruction("################################################################# ");
-        printInstruction("");
         printInstruction("Run following command to deploy kubernetes artifacts: ");
         printInstruction("kubectl create -f " + outputDir + KUBERNETES);
-        printInstruction("");
-        printInstruction("################################################################# ");
     }
 }

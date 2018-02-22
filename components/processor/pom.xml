@@ -178,28 +178,28 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
-                            <minimizeJar>true</minimizeJar>
-                            <artifactSet>
-                                <excludes>
-                                    <exclude>org.slf4j:slf4j-api</exclude>
-                                    <exclude>org.slf4j:slf4j-jdk14</exclude>
-                                    <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</exclude>
-                                    <exclude>com.fasterxml.jackson.core:jackson-databind</exclude>
-                                    <exclude>com.fasterxml.jackson.core:jackson-annotations</exclude>
-                                    <exclude>com.fasterxml.jackson.core:jackson-core</exclude>
-                                    <exclude>commons-lang:commons-lang</exclude>
-                                    <exclude>org.yaml:snakeyaml</exclude>
-                                    <exclude>org.ballerinalang:ballerina-lang</exclude>
-                                    <exclude>org.ballerinalang:ballerina-launcher</exclude>
-                                    <exclude>org.ballerinalang:ballerina-builtin</exclude>
-                                    <exclude>org.ballerinalang:ballerina-core</exclude>
-                                    <exclude>org.ballerinalang:ballerina-mime</exclude>
-                                    <exclude>org.ballerinalang:ballerina-logging</exclude>
-                                    <exclude>org.ballerinalang:ballerina-http</exclude>
-                                    <exclude>junit:junit</exclude>
-                                    <exclude>org.bsc.maven:maven-processor-plugin</exclude>
-                                </excludes>
-                            </artifactSet>
+                            <!--<minimizeJar>true</minimizeJar>-->
+                            <!--<artifactSet>-->
+                                <!--<excludes>-->
+                                    <!--<exclude>org.slf4j:slf4j-api</exclude>-->
+                                    <!--<exclude>org.slf4j:slf4j-jdk14</exclude>-->
+                                    <!--<exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</exclude>-->
+                                    <!--<exclude>com.fasterxml.jackson.core:jackson-databind</exclude>-->
+                                    <!--<exclude>com.fasterxml.jackson.core:jackson-annotations</exclude>-->
+                                    <!--<exclude>com.fasterxml.jackson.core:jackson-core</exclude>-->
+                                    <!--<exclude>commons-lang:commons-lang</exclude>-->
+                                    <!--<exclude>org.yaml:snakeyaml</exclude>-->
+                                    <!--<exclude>org.ballerinalang:ballerina-lang</exclude>-->
+                                    <!--<exclude>org.ballerinalang:ballerina-launcher</exclude>-->
+                                    <!--<exclude>org.ballerinalang:ballerina-builtin</exclude>-->
+                                    <!--<exclude>org.ballerinalang:ballerina-core</exclude>-->
+                                    <!--<exclude>org.ballerinalang:ballerina-mime</exclude>-->
+                                    <!--<exclude>org.ballerinalang:ballerina-logging</exclude>-->
+                                    <!--<exclude>org.ballerinalang:ballerina-http</exclude>-->
+                                    <!--<exclude>junit:junit</exclude>-->
+                                    <!--<exclude>org.bsc.maven:maven-processor-plugin</exclude>-->
+                                <!--</excludes>-->
+                            <!--</artifactSet>-->
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>

@@ -111,32 +111,36 @@ public class ArtifactGenUtils {
     }
 
     public static void printError(String msg) {
-        final String ANSI_RESET = "\u001B[0m";
-        final String ANSI_RED = "\u001B[31m";
-        error.println(ANSI_RED + "error: " + msg + ANSI_RESET);
+        String ansiReset = "\u001B[0m";
+        String ansiRed = "\u001B[31m";
+        error.println(ansiRed + "error: " + msg + ansiReset);
     }
 
     public static void printWarn(String msg) {
-        final String ANSI_RESET = "\u001B[0m";
-        final String ANSI_YELLOW = "\u001B[33m";
-        out.println(ANSI_YELLOW + "warning: " + msg + ANSI_RESET);
+        String ansiReset = "\u001B[0m";
+        String ansiYELLOW = "\u001B[33m";
+        out.println(ansiYELLOW + "warning: " + msg + ansiReset);
     }
 
     public static void printSuccess(String msg) {
-        final String ANSI_RESET = "\u001B[0m";
-        final String ANSI_GREEN = "\u001B[32m";
-        out.println(ANSI_GREEN + "success: " + msg + ANSI_RESET);
+        if (debugEnabled) {
+            String ansiReset = "\u001B[0m";
+            String ansiGREEN = "\u001B[32m";
+            out.println(ansiGREEN + "success: " + msg + ansiReset);
+        }
     }
 
     public static void printInfo(String msg) {
-        final String ANSI_RESET = "\u001B[0m";
-        final String ANSI_BLUE = "\u001B[34m";
-        out.println(ANSI_BLUE + "info: " + msg + ANSI_RESET);
+        if (debugEnabled) {
+            String ansiReset = "\u001B[0m";
+            String ansiBLUE = "\u001B[34m";
+            out.println(ansiBLUE + "info: " + msg + ansiReset);
+        }
     }
 
     public static void printInstruction(String msg) {
-        final String ANSI_RESET = "\u001B[0m";
-        final String ANSI_PURPLE = "\u001B[35m";
-        out.println(ANSI_PURPLE + msg + ANSI_RESET);
+        String ansiReset = "\u001B[0m";
+        String ansiBLUE = "\u001B[34m";
+        out.println(ansiBLUE + msg + ansiReset);
     }
 }
