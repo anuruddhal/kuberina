@@ -35,6 +35,8 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.concurrent.CountDownLatch;
 
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
+
 /**
  * Generates Docker artifacts from annotations.
  */
@@ -79,7 +81,7 @@ public class DockerGenerator {
      * @param imageName docker image name
      * @param dockerDir dockerfile directory
      * @throws InterruptedException When error with docker build process
-     * @throws IOException When error with docker build process
+     * @throws IOException          When error with docker build process
      */
     public static void buildImage(String dockerEnv, String imageName, String dockerDir) throws
             InterruptedException, IOException {
@@ -129,13 +131,13 @@ public class DockerGenerator {
 
         @Override
         public void onError(String errorEvent) {
-            out.println("Error event occurred while building docker image: " + errorEvent);
+            printError("Error event occurred while building docker image: " + errorEvent);
             buildDone.countDown();
         }
 
         @Override
         public void onError(Throwable throwable) {
-            out.println("Error while building docker image: " + throwable.getMessage());
+            printError("Error while building docker image: " + throwable.getMessage());
             buildDone.countDown();
         }
 

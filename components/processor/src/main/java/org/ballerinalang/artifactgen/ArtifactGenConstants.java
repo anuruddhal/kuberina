@@ -63,6 +63,7 @@ public class ArtifactGenConstants {
     public static final String DEPLOYMENT_LIVENESS_ENABLE = "enable";
     public static final String DEPLOYMENT_ENV_VARS = "env";
 
+
     //Kubernetes service constants
     public static final String SVC_NAME = "name";
     public static final String SVC_LABELS = "labels";

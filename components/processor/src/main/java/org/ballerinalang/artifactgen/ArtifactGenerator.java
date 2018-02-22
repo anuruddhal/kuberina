@@ -47,6 +47,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.ballerinalang.artifactgen.ArtifactGenConstants.DEPLOYMENT_LIVENESS_ENABLE;
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printInfo;
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printInstruction;
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printSuccess;
 
 /**
  * Process Annotations and generate Artifacts.
@@ -125,9 +129,9 @@ class ArtifactGenerator {
         nameValue = (registry != null) ? registry + "/" + nameValue + ":" + tag : nameValue + ":" + tag;
         dockerModel.setName(nameValue);
 
-        out.println(dockerModel);
+        printInfo(dockerModel.toString());
         createDockerArtifacts(dockerModel, balxFilePath, outputDir);
-
+        printDockerInstructions(dockerModel.getName());
     }
 
     /**
@@ -172,8 +176,9 @@ class ArtifactGenerator {
         dockerModel.setImageBuild(imageBuild);
         createDockerArtifacts(dockerModel, balxFilePath, outputDir + File.separator + KUBERNETES + File
                 .separator + DOCKER);
-        out.println(deploymentModel);
+        printInfo(deploymentModel.toString());
         createDeploymentArtifacts(deploymentModel, outputDir, balxFilePath);
+        printKubernetesInstructions(outputDir);
     }
 
 
@@ -224,16 +229,16 @@ class ArtifactGenerator {
             ports.add(9090);
         }
 
-        out.println(serviceModel);
+        printInfo(serviceModel.toString());
         try {
             String svcContent = KubernetesServiceGenerator.generate(serviceModel);
             ArtifactGenUtils.writeToFile(svcContent, outputDir + File.separator + KUBERNETES + File
                     .separator + serviceInfo.getName() + SVC_POSTFIX);
-            out.println("Service yaml generated.");
+            printSuccess("Service yaml generated.");
         } catch (IOException e) {
-            error.println("Unable to write service content to " + outputDir);
+            printError("Unable to write service content to " + outputDir);
         } catch (ArtifactGenerationException e) {
-            error.println("Unable to generate service  " + e.getMessage());
+            printError("Unable to generate service  " + e.getMessage());
         }
         // Process Ingress Annotation only if svc annotation is present
         AnnAttachmentInfo ingressAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
@@ -295,16 +300,16 @@ class ArtifactGenerator {
         ingressModel.setServiceName(svc.getName());
         ingressModel.setServicePort(svc.getPort());
 
-        out.println(ingressModel);
+        printInfo(ingressModel.toString());
         try {
             String svcContent = KubernetesIngressGenerator.generate(ingressModel);
             ArtifactGenUtils.writeToFile(svcContent, outputDir + File.separator + KUBERNETES + File
                     .separator + serviceInfo.getName() + INGRESS_POSTFIX);
-            out.println("Ingress yaml generated.");
+            printSuccess("Ingress yaml generated.");
         } catch (IOException e) {
-            error.println("Unable to write ingress content to " + outputDir);
+            printError("Unable to write ingress content to " + outputDir);
         } catch (ArtifactGenerationException e) {
-            error.println("Unable to generate ingress content  " + e.getMessage());
+            printError("Unable to generate ingress content  " + e.getMessage());
         }
     }
 
@@ -425,18 +430,18 @@ class ArtifactGenerator {
         String dockerContent = DockerGenerator.generate(dockerModel);
         try {
             ArtifactGenUtils.writeToFile(dockerContent, outputDir + File.separator + "Dockerfile");
-            out.println("Dockerfile generation completed.");
+            printInfo("Dockerfile generation completed.");
             ArtifactGenUtils.copyFile(balxFilePath, outputDir + File.separator + ArtifactGenUtils.extractBalxName
                     (balxFilePath) + BALX);
             if (dockerModel.isImageBuild()) {
-                out.println("Building docker image ....");
+                printInfo("Building docker image ....");
                 DockerGenerator.buildImage(null, dockerModel.getName(), outputDir);
-                out.println("Docker image building completed.");
+                printSuccess("Docker image building completed.");
             }
         } catch (IOException e) {
-            error.println("Unable to write Dockerfile content to " + outputDir);
+            printError("Unable to write Dockerfile content to " + outputDir);
         } catch (InterruptedException e) {
-            error.println("Unable to create docker images " + e.getMessage());
+            printError("Unable to create docker images " + e.getMessage());
         }
     }
 
@@ -446,11 +451,29 @@ class ArtifactGenerator {
             String deploymentContent = KubernetesDeploymentGenerator.generate(deploymentModel);
             ArtifactGenUtils.writeToFile(deploymentContent, outputDir + File.separator + KUBERNETES + File
                     .separator + ArtifactGenUtils.extractBalxName(balxFilePath) + DEPLOYMENT_POSTFIX);
-            out.println("Deployment yaml generated.");
+            printSuccess("Deployment yaml generated.");
         } catch (IOException e) {
-            error.println("Unable to write deployment content to " + outputDir);
+            printError("Unable to write deployment content to " + outputDir);
         } catch (ArtifactGenerationException e) {
-            error.println("Unable to generate deployment  " + e.getMessage());
+            printError("Unable to generate deployment  " + e.getMessage());
         }
+    }
+
+    private static void printDockerInstructions(String dockerImageName) {
+        printInstruction("################################################################# ");
+        printInstruction("");
+        printInstruction("Run following command to start docker container: ");
+        printInstruction("docker run -d -p " + dockerImageName);
+        printInstruction("");
+        printInstruction("################################################################# ");
+    }
+
+    private static void printKubernetesInstructions(String outputDir) {
+        printInstruction("################################################################# ");
+        printInstruction("");
+        printInstruction("Run following command to deploy kubernetes artifacts: ");
+        printInstruction("kubectl create -f " + outputDir + KUBERNETES);
+        printInstruction("");
+        printInstruction("################################################################# ");
     }
 }

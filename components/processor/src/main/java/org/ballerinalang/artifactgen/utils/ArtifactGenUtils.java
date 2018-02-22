@@ -41,6 +41,7 @@ public class ArtifactGenUtils {
     private static final boolean debugEnabled = "true".equals(System.getProperty(
             ArtifactGenConstants.ENABLE_DEBUG_LOGS));
     private static final PrintStream error = System.err;
+    private static final PrintStream out = System.out;
 
     /**
      * Write content to a File. Create the required directories if they don't not exists.
@@ -107,5 +108,35 @@ public class ArtifactGenUtils {
     public static String extractBalxName(String balxFilePath) {
         return balxFilePath.substring(balxFilePath.lastIndexOf(File.separator) + 1, balxFilePath.lastIndexOf("" +
                 ".balx"));
+    }
+
+    public static void printError(String msg) {
+        final String ANSI_RESET = "\u001B[0m";
+        final String ANSI_RED = "\u001B[31m";
+        error.println(ANSI_RED + "error: " + msg + ANSI_RESET);
+    }
+
+    public static void printWarn(String msg) {
+        final String ANSI_RESET = "\u001B[0m";
+        final String ANSI_YELLOW = "\u001B[33m";
+        out.println(ANSI_YELLOW + "warning: " + msg + ANSI_RESET);
+    }
+
+    public static void printSuccess(String msg) {
+        final String ANSI_RESET = "\u001B[0m";
+        final String ANSI_GREEN = "\u001B[32m";
+        out.println(ANSI_GREEN + "success: " + msg + ANSI_RESET);
+    }
+
+    public static void printInfo(String msg) {
+        final String ANSI_RESET = "\u001B[0m";
+        final String ANSI_BLUE = "\u001B[34m";
+        out.println(ANSI_BLUE + "info: " + msg + ANSI_RESET);
+    }
+
+    public static void printInstruction(String msg) {
+        final String ANSI_RESET = "\u001B[0m";
+        final String ANSI_PURPLE = "\u001B[35m";
+        out.println(ANSI_PURPLE + msg + ANSI_RESET);
     }
 }

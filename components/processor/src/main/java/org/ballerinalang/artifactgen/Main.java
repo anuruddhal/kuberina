@@ -14,6 +14,10 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printInfo;
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printWarn;
+
 /**
  * Main class for demo purposes.
  */
@@ -55,12 +59,12 @@ public class Main {
                             deploymentCount += 1;
                             deploymentAnnotatedService = serviceInfo;
                         } else {
-                            out.println("Warning : multiple deployment{} annotations detected. Ignoring annotation in" +
+                            printWarn("multiple deployment{} annotations detected. Ignoring annotation in" +
                                     " service: " + serviceInfo.getName());
                         }
                     }
                     if (serviceAnnotation != null) {
-                        out.println("Processing svc{} for :" + serviceInfo.getName());
+                        printInfo("Processing svc{} annotation for :" + serviceInfo.getName());
                         String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
                                 .extractBalxName(filePath)
                                 + File.separator;
@@ -68,11 +72,11 @@ public class Main {
                     }
                     if (dockerAnnotation != null) {
                         if (dockerCount < 1) {
-                            out.println("Processing docker{} for : " + serviceInfo.getName());
+                            printInfo("Processing docker{} annotation for : " + serviceInfo.getName());
                             dockerCount += 1;
                             dockerAnnotatedService = serviceInfo;
                         } else {
-                            out.println("warning : multiple docker{} annotations detected. Ignoring annotation in " +
+                            printWarn("multiple docker{} annotations detected. Ignoring annotation in " +
                                     "service: " + serviceInfo.getName());
                         }
                     }
@@ -87,13 +91,13 @@ public class Main {
                 if (dockerAnnotatedService != null) {
                     String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File
                             .separator;
-                    out.println("Output Directory " + targetPath);
+                    printInfo("Output Directory " + targetPath);
                     ArtifactGenerator.
                             processDockerAnnotationForService(deploymentAnnotatedService, filePath, targetPath);
                 }
             }
         } catch (IOException e) {
-            error.println("Error: error occurred while reading balx file" + e.getMessage());
+            printError("error occurred while reading balx file" + e.getMessage());
         }
 
 
