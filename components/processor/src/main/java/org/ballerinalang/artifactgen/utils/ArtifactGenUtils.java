@@ -32,6 +32,8 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Util methods used for artifact generation.
@@ -105,6 +107,18 @@ public class ArtifactGenUtils {
 
     }
 
+    public static List<Integer> extractPorts(ServiceInfo serviceInfo) {
+        List<Integer> ports = new ArrayList<>();
+        AnnAttachmentInfo annotationInfo = serviceInfo.getAnnotationAttachmentInfo(HttpConstants
+                .HTTP_PACKAGE_PATH, HttpConstants.ANN_NAME_CONFIG);
+        AnnAttributeValue portAttrVal = annotationInfo.getAttributeValue(HttpConstants.ANN_CONFIG_ATTR_PORT);
+        if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
+            ports.add(Math.toIntExact(portAttrVal.getIntValue()));
+        }
+        //TODO: remove this with actual port(s)
+        ports.add(9090);
+        return ports;
+    }
     public static String extractBalxName(String balxFilePath) {
         return balxFilePath.substring(balxFilePath.lastIndexOf(File.separator) + 1, balxFilePath.lastIndexOf("" +
                 ".balx"));

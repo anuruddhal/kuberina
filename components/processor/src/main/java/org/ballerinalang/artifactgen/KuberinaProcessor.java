@@ -113,7 +113,7 @@ public class KuberinaProcessor extends AbstractCompilerPlugin {
                             .separator;
                     printInfo("Output Directory " + targetPath);
                     ArtifactGenerator.
-                            processDockerAnnotationForService(deploymentAnnotatedService, filePath, targetPath);
+                            processDockerAnnotationForService(dockerAnnotatedService, filePath, targetPath);
                 }
             }
         } catch (IOException e) {

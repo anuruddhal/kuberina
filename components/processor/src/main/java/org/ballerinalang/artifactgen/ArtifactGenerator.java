@@ -47,6 +47,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.ballerinalang.artifactgen.ArtifactGenConstants.DEPLOYMENT_LIVENESS_ENABLE;
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.extractPorts;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printInfo;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printInstruction;
@@ -118,10 +119,7 @@ class ArtifactGenerator {
                 .DOCKER_PUSH) != null && dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_PUSH).getBooleanValue();
         dockerModel.setPush(push);
-        List<Integer> portList = new ArrayList<>();
-        if (portList.addAll(ports)) {
-            dockerModel.setPorts(portList);
-        }
+        dockerModel.setPorts(extractPorts(serviceInfo));
 
         String nameValue = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME) != null ?
                 dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME).getStringValue() :
