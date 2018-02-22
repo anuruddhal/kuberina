@@ -31,6 +31,7 @@ public class IngressModel {
     private String serviceName;
     private int servicePort;
     private String targetPath;
+    private boolean enableTLS;
 
     public String getName() {
         return name;
@@ -96,6 +97,14 @@ public class IngressModel {
         this.targetPath = targetPath;
     }
 
+    public boolean isEnableTLS() {
+        return enableTLS;
+    }
+
+    public void setEnableTLS(boolean enableTLS) {
+        this.enableTLS = enableTLS;
+    }
+
     @Override
     public String toString() {
         return "IngressModel{" +
@@ -107,6 +116,7 @@ public class IngressModel {
                 ", serviceName='" + serviceName + '\'' +
                 ", servicePort=" + servicePort +
                 ", targetPath='" + targetPath + '\'' +
+                ", enableTLS=" + enableTLS +
                 '}';
     }
 }

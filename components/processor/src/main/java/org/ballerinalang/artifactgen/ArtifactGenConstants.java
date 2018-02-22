@@ -76,5 +76,6 @@ public class ArtifactGenConstants {
     public static final String INGRESS_PATH = "path";
     public static final String INGRESS_TARGET_PATH = "targetPath";
     public static final String INGRESS_CLASS = "ingressClass";
+    public static final String INGRESS_ENABLE_TLS = "enableTLS";
 
 }

@@ -284,6 +284,10 @@ class ArtifactGenerator {
                 "/";
         ingressModel.setPath(path);
 
+        boolean enableTLS = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_ENABLE_TLS) != null
+                && ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_ENABLE_TLS).getBooleanValue();
+        ingressModel.setEnableTLS(enableTLS);
+
         String targetPath = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_TARGET_PATH) != null ?
                 ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_TARGET_PATH).getStringValue() :
                 null;

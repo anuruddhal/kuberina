@@ -85,6 +85,7 @@ public annotation externalSvc attach service {
 @Field {value:"path: Resource path"}
 @Field {value:"targetPath: Target path for url rewrite"}
 @Field {value:"ingressClass: Ingress class"}
+@Field {value:"enableTLS: Enable ingress TLS"}
 public annotation ingress attach service {
     string name;
     string labels;
@@ -92,4 +93,5 @@ public annotation ingress attach service {
     string path;
     string targetPath;
     string ingressClass;
+    boolean enableTLS;
 }

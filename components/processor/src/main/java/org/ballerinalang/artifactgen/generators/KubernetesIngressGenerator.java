@@ -65,14 +65,19 @@ public class KubernetesIngressGenerator {
                         .getPath()).build();
 
         //generate TLS
-        IngressTLS ingressTLS = new IngressTLSBuilder()
-                .withHosts(ingressModel.getHostname())
-                .build();
+        IngressTLS ingressTLS = null;
+        if (ingressModel.isEnableTLS()) {
+            ingressTLS = new IngressTLSBuilder()
+                    .withHosts(ingressModel.getHostname())
+                    .build();
+        } else {
+            ingressTLS = new IngressTLSBuilder().build();
+        }
 
         //generate annotationMap
         Map<String, String> annotationMap = new HashMap<>();
         annotationMap.put(INGRESS_CLASS, ingressModel.getIngressClass());
-        annotationMap.put(INGRESS_SSL_PASS_THROUGH, "true");
+        annotationMap.put(INGRESS_SSL_PASS_THROUGH, String.valueOf(ingressModel.isEnableTLS()));
         if (ingressModel.getTargetPath() != null) {
             annotationMap.put(INGRESS_REWRITE_TARGET, ingressModel.getTargetPath());
         }
