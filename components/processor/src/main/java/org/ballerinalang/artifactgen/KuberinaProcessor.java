@@ -30,7 +30,6 @@ import org.ballerinalang.util.diagnostic.DiagnosticLog;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,8 +42,6 @@ import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printWarn;
  * Compiler plugin to generate kubernetes artifacts.
  */
 public class KuberinaProcessor extends AbstractCompilerPlugin {
-    PrintStream out = System.out;
-
     @Override
     public void init(DiagnosticLog diagnosticLog) {
     }
