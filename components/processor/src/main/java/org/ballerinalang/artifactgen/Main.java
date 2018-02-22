@@ -23,7 +23,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String filePath = "/Users/anuruddha/Repos/ballerina-k8s-demo/hello-world-docker/hello-world-docker.balx";
+        String filePath = "/Users/anuruddha/Repos/ballerina-k8s-demo/hello-world-k8s/hello-world-k8s.balx";
         //String filePath = args[0];
         String userDir = new File(filePath).getParentFile().getAbsolutePath();
         try {
@@ -38,10 +38,8 @@ public class Main {
                 serviceInfos = packageInfo.getServiceInfoEntries();
                 int dockerCount = 0;
                 int deploymentCount = 0;
+                ServiceInfo deploymentService = null;
                 for (ServiceInfo serviceInfo : serviceInfos) {
-                    AnnAttachmentInfo deploymentAnnotation = serviceInfo.getAnnotationAttachmentInfo
-                            (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE,
-                                    ArtifactGenConstants.DEPLOYMENT_ANNOTATION);
                     AnnAttachmentInfo serviceAnnotation = serviceInfo.getAnnotationAttachmentInfo
                             (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE,
                                     ArtifactGenConstants.SERVICE_ANNOTATION);
@@ -49,14 +47,12 @@ public class Main {
                             (ArtifactGenConstants.DOCKER_ANNOTATION_PACKAGE,
                                     ArtifactGenConstants.DOCKER_ANNOTATION);
 
-                    if (deploymentAnnotation != null) {
+                    if (serviceInfo.getAnnotationAttachmentInfo
+                            (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE,
+                                    ArtifactGenConstants.DEPLOYMENT_ANNOTATION) != null) {
                         if (deploymentCount < 1) {
                             deploymentCount += 1;
-                            out.println("Processing deployment{} for : " + serviceInfo.getName());
-                            String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
-                                    .extractBalxName(filePath)
-                                    + File.separator;
-                            ArtifactGenerator.processDeploymentAnnotationForService(serviceInfo, filePath, targetPath);
+                            deploymentService = serviceInfo;
                         } else {
                             out.println("Warning : multiple deployment{} annotations detected. Ignoring annotation in" +
                                     " service: " + serviceInfo.getName());
@@ -84,9 +80,15 @@ public class Main {
                     }
 
                 }
+                if (deploymentService != null) {
+                    String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
+                            .extractBalxName(filePath)
+                            + File.separator;
+                    ArtifactGenerator.processDeploymentAnnotationForService(deploymentService, filePath, targetPath);
+                }
             }
         } catch (IOException e) {
-            error.println("Error: error occured while reading balx file" + e.getMessage());
+            error.println("Error: error occurred while reading balx file" + e.getMessage());
         }
 
 

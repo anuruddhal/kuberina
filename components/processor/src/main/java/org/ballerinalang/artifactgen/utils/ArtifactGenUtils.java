@@ -101,9 +101,10 @@ public class ArtifactGenUtils {
         AnnAttributeValue portAttrVal = annotationInfo.getAttributeValue(HttpConstants.ANN_CONFIG_ATTR_PORT);
         if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
             ports.add(Math.toIntExact(portAttrVal.getIntValue()));
+        } else {
+            //TODO: remove this with actual port(s)
+            ports.add(9090);
         }
-        //TODO: remove this with actual port(s)
-        ports.add(9090);
         return ports;
     }
 

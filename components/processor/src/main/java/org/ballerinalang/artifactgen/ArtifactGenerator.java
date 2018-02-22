@@ -36,10 +36,13 @@ import org.ballerinalang.util.codegen.ServiceInfo;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -60,6 +63,7 @@ public class ArtifactGenerator {
     private static final String DOCKER_LATEST_TAG = ":latest";
     private static final String INGRESS_CLASS_NGINX = "nginx";
     private static final String INGRESS_HOSTNAME_POSTFIX = ".com";
+    private static Set<Integer> ports = new HashSet<>();
 
     /**
      * Process docker annotations for ballerina Service.
@@ -136,8 +140,7 @@ public class ArtifactGenerator {
             return;
         }
         DeploymentModel deploymentModel = getDeploymentModel(deploymentAnnotationInfo, balxFilePath);
-        List<Integer> ports = ArtifactGenUtils.extractPorts(serviceInfo);
-        deploymentModel.setPorts(ports);
+
         String image = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE)
                 != null ?
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE).getStringValue() :
@@ -153,22 +156,13 @@ public class ArtifactGenerator {
         String balxFileName = ArtifactGenUtils.extractBalxName(balxFilePath) + BALX;
         dockerModel.setBalxFileName(balxFileName);
         dockerModel.setBalxFilePath(balxFileName);
-        dockerModel.setPorts(ports);
+        dockerModel.setPorts(deploymentModel.getPorts());
         dockerModel.setService(true);
         dockerModel.setImageBuild(imageBuild);
         createDockerArtifacts(dockerModel, balxFilePath, outputDir + File.separator + KUBERNETES + File
                 .separator + DOCKER);
         out.println(deploymentModel);
-        try {
-            String deploymentContent = KubernetesDeploymentGenerator.generate(deploymentModel);
-            ArtifactGenUtils.writeToFile(deploymentContent, outputDir + File.separator + KUBERNETES + File
-                    .separator + ArtifactGenUtils.extractBalxName(balxFilePath) + DEPLOYMENT_POSTFIX);
-            out.println("Deployment yaml generated.");
-        } catch (IOException e) {
-            error.println("Unable to write deployment content to " + outputDir);
-        } catch (ArtifactGenerationException e) {
-            error.println("Unable to generate deployment  " + e.getMessage());
-        }
+        createDeploymentArtifacts(deploymentModel, outputDir, balxFilePath);
     }
 
 
@@ -210,10 +204,13 @@ public class ArtifactGenerator {
                 .HTTP_PACKAGE_PATH, HttpConstants.ANN_NAME_CONFIG);
         AnnAttributeValue portAttrVal = annotationInfo.getAttributeValue(HttpConstants.ANN_CONFIG_ATTR_PORT);
         if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
-            serviceModel.setPort(Math.toIntExact(portAttrVal.getIntValue()));
+            int port = Math.toIntExact(portAttrVal.getIntValue());
+            serviceModel.setPort(port);
+            ports.add(port);
         } else {
             //TODO: default port hardcoded.
             serviceModel.setPort(9090);
+            ports.add(9090);
         }
 
         out.println(serviceModel);
@@ -332,6 +329,13 @@ public class ArtifactGenerator {
         return envMap;
     }
 
+    /**
+     * Extract deployment info from Annotation attachment.
+     *
+     * @param deploymentAnnotationInfo Annotation attachment object
+     * @param balxFilePath             ballerina file path
+     * @return DeploymentModel for kubernetes
+     */
     private static DeploymentModel getDeploymentModel(AnnAttachmentInfo deploymentAnnotationInfo, String balxFilePath) {
         DeploymentModel deploymentModel = new DeploymentModel();
         String outputFileName = ArtifactGenUtils.extractBalxName(balxFilePath);
@@ -339,8 +343,13 @@ public class ArtifactGenerator {
                 null ?
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAME).getStringValue() :
                 outputFileName + "-deployment";
-        deploymentModel.setName(deploymentName);
+        //TODO:Validate deployment name
+        deploymentModel.setName(deploymentName.toLowerCase(Locale.ENGLISH));
 
+        List<Integer> portList = new ArrayList();
+        if (portList.addAll(ports)) {
+            deploymentModel.setPorts(portList);
+        }
         String namespace = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAMESPACE) !=
                 null ? deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_NAMESPACE)
                 .getStringValue() :
@@ -397,6 +406,19 @@ public class ArtifactGenerator {
             error.println("Unable to write Dockerfile content to " + outputDir);
         } catch (InterruptedException e) {
             error.println("Unable to create docker images " + e.getMessage());
+        }
+    }
+
+    private static void createDeploymentArtifacts(DeploymentModel deploymentModel, String outputDir, String balxFilePath) {
+        try {
+            String deploymentContent = KubernetesDeploymentGenerator.generate(deploymentModel);
+            ArtifactGenUtils.writeToFile(deploymentContent, outputDir + File.separator + KUBERNETES + File
+                    .separator + ArtifactGenUtils.extractBalxName(balxFilePath) + DEPLOYMENT_POSTFIX);
+            out.println("Deployment yaml generated.");
+        } catch (IOException e) {
+            error.println("Unable to write deployment content to " + outputDir);
+        } catch (ArtifactGenerationException e) {
+            error.println("Unable to generate deployment  " + e.getMessage());
         }
     }
 }

@@ -30,6 +30,7 @@ public class ArtifactGenConstants {
     public static final String KUBERNETES_ANNOTATION_PACKAGE = "ballerina.kubernetes";
     public static final String DOCKER_ANNOTATION_PACKAGE = "ballerina.docker";
     public static final String DEPLOYMENT_ANNOTATION = "deployment";
+    public static final String EXTERNAL_DEPLOYMENT_ANNOTATION = "externalDeployment";
     public static final String SERVICE_ANNOTATION = "svc";
     public static final String INGRESS_ANNOTATION = "ingress";
     public static final String DOCKER_ANNOTATION = "configuration";
