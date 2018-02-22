@@ -52,6 +52,7 @@ public class ArtifactGenConstants {
     public static final String DEPLOYMENT_LIVENESS = "liveness";
     public static final String DEPLOYMENT_INITIAL_DELAY_SECONDS = "initialDelaySeconds";
     public static final String DEPLOYMENT_PERIOD_SECONDS = "periodSeconds";
+    public static final String DEPLOYMENT_LIVENESS_PORT = "livenessPort";
     public static final String DEPLOYMENT_IMAGE_PULL_POLICY = "imagePullPolicy";
     public static final String DEPLOYMENT_NAMESPACE = "namespace";
     public static final String DEPLOYMENT_IMAGE = "image";
@@ -59,6 +60,7 @@ public class ArtifactGenConstants {
     public static final String DEPLOYMENT_NAMESPACE_DEFAULT = "default";
     public static final String DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT = "IfNotPresent";
     public static final String DEPLOYMENT_LIVENESS_DISABLE = "disable";
+    public static final String DEPLOYMENT_LIVENESS_ENABLE = "enable";
     public static final String DEPLOYMENT_ENV_VARS = "env";
 
     //Kubernetes service constants

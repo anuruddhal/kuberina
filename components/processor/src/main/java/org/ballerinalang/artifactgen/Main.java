@@ -23,8 +23,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String filePath = "/Users/anuruddha/Repos/ballerina-k8s-demo/hello-world-k8s/hello-world-k8s.balx";
-        //String filePath = args[0];
+        //String filePath = "/Users/anuruddha/Repos/ballerina-k8s-demo/hello-world-k8s-config/hello-world-k8s.balx";
+        String filePath = args[0];
         String userDir = new File(filePath).getParentFile().getAbsolutePath();
         try {
             byte[] bFile = Files.readAllBytes(Paths.get(filePath));
@@ -38,7 +38,8 @@ public class Main {
                 serviceInfos = packageInfo.getServiceInfoEntries();
                 int dockerCount = 0;
                 int deploymentCount = 0;
-                ServiceInfo deploymentService = null;
+                ServiceInfo deploymentAnnotatedService = null;
+                ServiceInfo dockerAnnotatedService = null;
                 for (ServiceInfo serviceInfo : serviceInfos) {
                     AnnAttachmentInfo serviceAnnotation = serviceInfo.getAnnotationAttachmentInfo
                             (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE,
@@ -52,7 +53,7 @@ public class Main {
                                     ArtifactGenConstants.DEPLOYMENT_ANNOTATION) != null) {
                         if (deploymentCount < 1) {
                             deploymentCount += 1;
-                            deploymentService = serviceInfo;
+                            deploymentAnnotatedService = serviceInfo;
                         } else {
                             out.println("Warning : multiple deployment{} annotations detected. Ignoring annotation in" +
                                     " service: " + serviceInfo.getName());
@@ -69,10 +70,7 @@ public class Main {
                         if (dockerCount < 1) {
                             out.println("Processing docker{} for : " + serviceInfo.getName());
                             dockerCount += 1;
-                            String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File
-                                    .separator;
-                            out.println("Output Directory " + targetPath);
-                            ArtifactGenerator.processDockerAnnotationForService(serviceInfo, filePath, targetPath);
+                            dockerAnnotatedService = serviceInfo;
                         } else {
                             out.println("warning : multiple docker{} annotations detected. Ignoring annotation in " +
                                     "service: " + serviceInfo.getName());
@@ -80,11 +78,19 @@ public class Main {
                     }
 
                 }
-                if (deploymentService != null) {
+                if (deploymentAnnotatedService != null) {
                     String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
                             .extractBalxName(filePath)
                             + File.separator;
-                    ArtifactGenerator.processDeploymentAnnotationForService(deploymentService, filePath, targetPath);
+                    ArtifactGenerator.
+                            processDeploymentAnnotationForService(deploymentAnnotatedService, filePath, targetPath);
+                }
+                if (dockerAnnotatedService != null) {
+                    String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File
+                            .separator;
+                    out.println("Output Directory " + targetPath);
+                    ArtifactGenerator.
+                            processDockerAnnotationForService(deploymentAnnotatedService, filePath, targetPath);
                 }
             }
         } catch (IOException e) {

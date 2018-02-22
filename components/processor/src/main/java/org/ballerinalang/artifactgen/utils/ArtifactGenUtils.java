@@ -32,8 +32,6 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Util methods used for artifact generation.
@@ -94,18 +92,16 @@ public class ArtifactGenUtils {
         return str == null || str.length() == 0;
     }
 
-    public static List<Integer> extractPorts(ServiceInfo serviceInfo) {
-        List<Integer> ports = new ArrayList<>();
+    public static int extractPort(ServiceInfo serviceInfo) {
         AnnAttachmentInfo annotationInfo = serviceInfo.getAnnotationAttachmentInfo(HttpConstants
                 .HTTP_PACKAGE_PATH, HttpConstants.ANN_NAME_CONFIG);
         AnnAttributeValue portAttrVal = annotationInfo.getAttributeValue(HttpConstants.ANN_CONFIG_ATTR_PORT);
         if (portAttrVal != null && portAttrVal.getIntValue() > 0) {
-            ports.add(Math.toIntExact(portAttrVal.getIntValue()));
-        } else {
-            //TODO: remove this with actual port(s)
-            ports.add(9090);
+            return Math.toIntExact(portAttrVal.getIntValue());
         }
-        return ports;
+        //TODO: remove this with actual port(s)
+        return 9090;
+
     }
 
     public static String extractBalxName(String balxFilePath) {

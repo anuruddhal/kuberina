@@ -22,3 +22,4 @@ dependency-reduced-pom.xml
 
 # MacOS
 *.DS_Store
+*.zip

@@ -5,6 +5,7 @@ package ballerina.kubernetes;
 @Field {value:"labels: Labels for deployment"}
 @Field {value:"replicas: Number of replicas"}
 @Field {value:"liveness: Enable or disable liveness probe"}
+@Field {value:"livenessPort: Port to check the liveness"}
 @Field {value:"initialDelaySeconds: Initial delay in seconds before performing the first probe"}
 @Field {value:"periodSeconds: Liveness probe interval"}
 @Field {value:"imagePullPolicy: Docker image pull policy"}
@@ -17,6 +18,7 @@ public annotation deployment attach service, function {
     string labels;
     int replicas;
     string liveness;
+    int livenessPort;
     int initialDelaySeconds;
     int periodSeconds;
     string imagePullPolicy;

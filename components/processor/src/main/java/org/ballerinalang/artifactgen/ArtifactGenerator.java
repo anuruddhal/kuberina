@@ -46,10 +46,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.ballerinalang.artifactgen.ArtifactGenConstants.DEPLOYMENT_LIVENESS_ENABLE;
+
 /**
  * Process Annotations and generate Artifacts.
  */
-public class ArtifactGenerator {
+class ArtifactGenerator {
 
     private static final PrintStream out = System.out;
     private static final PrintStream error = System.err;
@@ -72,7 +74,7 @@ public class ArtifactGenerator {
      * @param balxFilePath ballerina file name
      * @param outputDir    target output directory
      */
-    public static void processDockerAnnotationForService(ServiceInfo serviceInfo, String balxFilePath, String
+    static void processDockerAnnotationForService(ServiceInfo serviceInfo, String balxFilePath, String
             outputDir) {
         AnnAttachmentInfo dockerAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
                 (ArtifactGenConstants.DOCKER_ANNOTATION_PACKAGE, ArtifactGenConstants.DOCKER_ANNOTATION);
@@ -112,7 +114,10 @@ public class ArtifactGenerator {
                 .DOCKER_PUSH) != null && dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_PUSH).getBooleanValue();
         dockerModel.setPush(push);
-        dockerModel.setPorts(ArtifactGenUtils.extractPorts(serviceInfo));
+        List<Integer> portList = new ArrayList<>();
+        if (portList.addAll(ports)) {
+            dockerModel.setPorts(portList);
+        }
 
         String nameValue = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME) != null ?
                 dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME).getStringValue() :
@@ -132,7 +137,7 @@ public class ArtifactGenerator {
      * @param balxFilePath ballerina file name
      * @param outputDir    target output directory
      */
-    public static void processDeploymentAnnotationForService(ServiceInfo serviceInfo, String balxFilePath, String
+    static void processDeploymentAnnotationForService(ServiceInfo serviceInfo, String balxFilePath, String
             outputDir) {
         AnnAttachmentInfo deploymentAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
                 (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE, ArtifactGenConstants.DEPLOYMENT_ANNOTATION);
@@ -140,6 +145,12 @@ public class ArtifactGenerator {
             return;
         }
         DeploymentModel deploymentModel = getDeploymentModel(deploymentAnnotationInfo, balxFilePath);
+        int livenessPort = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DEPLOYMENT_LIVENESS_PORT)
+                != null ?
+                Math.toIntExact(deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                        .DEPLOYMENT_LIVENESS_PORT).getIntValue()) : ArtifactGenUtils.extractPort(serviceInfo);
+        deploymentModel.setLivenessPort(livenessPort);
 
         String image = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE)
                 != null ?
@@ -173,7 +184,7 @@ public class ArtifactGenerator {
      * @param balxFilePath ballerina file name
      * @param outputDir    target output directory
      */
-    public static void processSvcAnnotationForService(ServiceInfo serviceInfo, String balxFilePath, String
+    static void processSvcAnnotationForService(ServiceInfo serviceInfo, String balxFilePath, String
             outputDir) {
         AnnAttachmentInfo svcAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
                 (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE, ArtifactGenConstants.SERVICE_ANNOTATION);
@@ -322,11 +333,10 @@ public class ArtifactGenerator {
         if (env == null) {
             return null;
         }
-        Map<String, String> envMap = Pattern.compile("\\s*,\\s*")
+        return Pattern.compile("\\s*,\\s*")
                 .splitAsStream(env.trim())
                 .map(s -> s.split(":", 2))
                 .collect(Collectors.toMap(a -> a[0], a -> a.length > 1 ? a[1] : ""));
-        return envMap;
     }
 
     /**
@@ -346,7 +356,7 @@ public class ArtifactGenerator {
         //TODO:Validate deployment name
         deploymentModel.setName(deploymentName.toLowerCase(Locale.ENGLISH));
 
-        List<Integer> portList = new ArrayList();
+        List<Integer> portList = new ArrayList<>();
         if (portList.addAll(ports)) {
             deploymentModel.setPorts(portList);
         }
@@ -369,6 +379,23 @@ public class ArtifactGenerator {
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_LIVENESS).getStringValue() :
                 ArtifactGenConstants.DEPLOYMENT_LIVENESS_DISABLE;
         deploymentModel.setLiveness(liveness);
+
+        if (DEPLOYMENT_LIVENESS_ENABLE.equals(liveness)) {
+            int initialDelay = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                    .DEPLOYMENT_INITIAL_DELAY_SECONDS)
+                    != null ?
+                    Math.toIntExact(deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                            .DEPLOYMENT_INITIAL_DELAY_SECONDS).getIntValue()) :
+                    5;
+            deploymentModel.setInitialDelaySeconds(initialDelay);
+            int periodSeconds = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                    .DEPLOYMENT_PERIOD_SECONDS)
+                    != null ?
+                    Math.toIntExact(deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                            .DEPLOYMENT_PERIOD_SECONDS).getIntValue()) :
+                    20;
+            deploymentModel.setPeriodSeconds(periodSeconds);
+        }
 
         int replicas = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_REPLICAS) != null ?
                 Math.toIntExact(deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_REPLICAS)
@@ -409,7 +436,8 @@ public class ArtifactGenerator {
         }
     }
 
-    private static void createDeploymentArtifacts(DeploymentModel deploymentModel, String outputDir, String balxFilePath) {
+    private static void createDeploymentArtifacts(DeploymentModel deploymentModel, String outputDir,
+                                                  String balxFilePath) {
         try {
             String deploymentContent = KubernetesDeploymentGenerator.generate(deploymentModel);
             ArtifactGenUtils.writeToFile(deploymentContent, outputDir + File.separator + KUBERNETES + File

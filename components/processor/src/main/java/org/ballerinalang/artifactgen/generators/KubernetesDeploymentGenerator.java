@@ -25,6 +25,10 @@ import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
+import io.fabric8.kubernetes.api.model.Probe;
+import io.fabric8.kubernetes.api.model.ProbeBuilder;
+import io.fabric8.kubernetes.api.model.TCPSocketAction;
+import io.fabric8.kubernetes.api.model.TCPSocketActionBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
@@ -36,6 +40,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.ballerinalang.artifactgen.ArtifactGenConstants.DEPLOYMENT_LIVENESS_DISABLE;
 
 /**
  * Generates kubernetes deployment from annotations.
@@ -105,6 +111,7 @@ public class KubernetesDeploymentGenerator {
                 .withImagePullPolicy(deploymentModel.getImagePullPolicy())
                 .withPorts(containerPorts)
                 .withEnv(populateEnvVar(deploymentModel.getEnv()))
+                .withLivenessProbe(generateLivenessProbe(deploymentModel))
                 .build();
     }
 
@@ -118,6 +125,20 @@ public class KubernetesDeploymentGenerator {
             envVars.add(envVar);
         });
         return envVars;
+    }
+
+    private static Probe generateLivenessProbe(DeploymentModel deploymentModel) {
+        if (DEPLOYMENT_LIVENESS_DISABLE.equals(deploymentModel.getLiveness())) {
+            return null;
+        }
+        TCPSocketAction tcpSocketAction = new TCPSocketActionBuilder()
+                .withNewPort(deploymentModel.getLivenessPort())
+                .build();
+        return new ProbeBuilder()
+                .withInitialDelaySeconds(deploymentModel.getInitialDelaySeconds())
+                .withPeriodSeconds(deploymentModel.getPeriodSeconds())
+                .withTcpSocket(tcpSocketAction)
+                .build();
     }
 }
 

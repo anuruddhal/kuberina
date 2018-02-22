@@ -28,6 +28,7 @@ public class DeploymentModel {
     private Map<String, String> labels;
     private int replicas;
     private String liveness;
+    private int livenessPort;
     private int initialDelaySeconds;
     private int periodSeconds;
     private String imagePullPolicy;
@@ -124,6 +125,14 @@ public class DeploymentModel {
         this.env = env;
     }
 
+    public int getLivenessPort() {
+        return livenessPort;
+    }
+
+    public void setLivenessPort(int livenessPort) {
+        this.livenessPort = livenessPort;
+    }
+
     @Override
     public String toString() {
         return "DeploymentModel{" +
@@ -131,6 +140,7 @@ public class DeploymentModel {
                 ", labels=" + labels +
                 ", replicas=" + replicas +
                 ", liveness='" + liveness + '\'' +
+                ", livenessPort=" + livenessPort +
                 ", initialDelaySeconds=" + initialDelaySeconds +
                 ", periodSeconds=" + periodSeconds +
                 ", imagePullPolicy='" + imagePullPolicy + '\'' +
