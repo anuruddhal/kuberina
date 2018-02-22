@@ -459,7 +459,7 @@ class ArtifactGenerator {
 
     private static void printDockerInstructions(String dockerImageName) {
         printInstruction("Run following command to start docker container: ");
-        printInstruction("docker run -d -p " + dockerImageName);
+        printInstruction("docker run -d -p 9090:9090 " + dockerImageName);
 
     }
 
