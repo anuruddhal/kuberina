@@ -23,8 +23,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //String filePath = "/Users/anuruddha/Repos/ballerina-k8s-demo/foodstore/foodstore.balx";
-        String filePath = args[0];
+        String filePath = "/Users/anuruddha/Repos/ballerina-k8s-demo/foodstore/foodstore.balx";
+        //String filePath = args[0];
         String userDir = new File(filePath).getParentFile().getAbsolutePath();
         try {
             byte[] bFile = Files.readAllBytes(Paths.get(filePath));
@@ -76,7 +76,6 @@ public class Main {
                                     "service: " + serviceInfo.getName());
                         }
                     }
-
                 }
                 if (deploymentAnnotatedService != null) {
                     String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
