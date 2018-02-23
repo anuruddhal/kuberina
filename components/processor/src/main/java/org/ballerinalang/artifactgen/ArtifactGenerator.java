@@ -36,6 +36,8 @@ import org.ballerinalang.util.codegen.ServiceInfo;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -380,7 +382,6 @@ class ArtifactGenerator {
                 ArtifactGenConstants.DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT;
         deploymentModel.setImagePullPolicy(imagePullPolicy);
 
-        //TODO:handle liveness probe.
         String liveness = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_LIVENESS)
                 != null ?
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_LIVENESS).getStringValue() :
@@ -429,11 +430,13 @@ class ArtifactGenerator {
         try {
             ArtifactGenUtils.writeToFile(dockerContent, outputDir + File.separator + "Dockerfile");
             printInfo("Dockerfile generation completed.");
-            ArtifactGenUtils.copyFile(balxFilePath, outputDir + File.separator + ArtifactGenUtils.extractBalxName
-                    (balxFilePath) + BALX);
+            String balxDestination = outputDir + File.separator + ArtifactGenUtils.extractBalxName
+                    (balxFilePath) + BALX;
+            ArtifactGenUtils.copyFile(balxFilePath, balxDestination);
             if (dockerModel.isImageBuild()) {
                 printInfo("Building docker image ....");
-                DockerGenerator.buildImage(null, dockerModel.getName(), outputDir);
+                DockerGenerator.buildImage(dockerModel.getName(), outputDir);
+                Files.delete(Paths.get(balxDestination));
                 printSuccess("Docker image building completed.");
             }
         } catch (IOException e) {

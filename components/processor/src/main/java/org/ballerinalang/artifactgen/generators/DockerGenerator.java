@@ -46,7 +46,7 @@ public class DockerGenerator {
      */
     public static String generate(DockerModel dockerModel) {
         String dockerBase = "# --------------------------------------------------------------------\n" +
-                "# Copyright (c) 2018, WSO2 Inc. (http://wso2.com) All Rights Reserved.\n" +
+                "# Copyright (c) 2018, Ballerina Inc. (http://wso2.com) All Rights Reserved.\n" +
                 "#\n" +
                 "# Licensed under the Apache License, Version 2.0 (the \"License\");\n" +
                 "# you may not use this file except in compliance with the License.\n" +
@@ -66,7 +66,7 @@ public class DockerGenerator {
                 "\n" +
                 "COPY " + dockerModel.getBalxFileName() + " /home/ballerina \n\n";
 
-        StringBuffer stringBuffer = new StringBuffer(dockerBase);
+        StringBuilder stringBuffer = new StringBuilder(dockerBase);
         if (dockerModel.isService()) {
             stringBuffer.append("EXPOSE ");
             dockerModel.getPorts().forEach(port -> {
@@ -82,15 +82,14 @@ public class DockerGenerator {
     /**
      * Create docker image.
      *
-     * @param dockerEnv docker env
      * @param imageName docker image name
      * @param dockerDir dockerfile directory
      * @throws InterruptedException When error with docker build process
      * @throws IOException          When error with docker build process
      */
-    public static void buildImage(String dockerEnv, String imageName, String dockerDir) throws
+    public static void buildImage(String imageName, String dockerDir) throws
             InterruptedException, IOException {
-        DockerClient client = getDockerClient(dockerEnv);
+        DockerClient client = getDockerClient();
         OutputHandle buildHandle = client.image()
                 .build()
                 .withRepositoryName(imageName)
@@ -106,18 +105,12 @@ public class DockerGenerator {
     /**
      * Creates a {@link DockerClient} from the given Docker host URL.
      *
-     * @param env The URL of the Docker host. If this is null, a {@link DockerClient} pointed to the local Docker
-     *            daemon will be created.
      * @return {@link DockerClient} object.
      */
-    private static DockerClient getDockerClient(String env) {
+    private static DockerClient getDockerClient() {
         DockerClient client;
-        if (env == null) {
-            env = LOCAL_DOCKER_DAEMON_SOCKET;
-        }
-
         Config dockerClientConfig = new ConfigBuilder()
-                .withDockerUrl(env)
+                .withDockerUrl(LOCAL_DOCKER_DAEMON_SOCKET)
                 .build();
 
         client = new io.fabric8.docker.client.DefaultDockerClient(dockerClientConfig);
