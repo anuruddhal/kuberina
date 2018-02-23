@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>kuberina-processor</artifactId>
     <packaging>jar</packaging>
-    <name>Ballerina - Kubernetes Annotation Processor</name>
+    <name>Kuberina - Kubernetes/Docker Annotation Processor</name>
     <url>http://ballerinalang.org</url>
 
     <dependencies>
@@ -208,14 +208,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <configuration>
-                    <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
-                </configuration>
-
             </plugin>
         </plugins>
     </build>

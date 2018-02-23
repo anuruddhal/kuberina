@@ -5,5 +5,4 @@
 1. Copy Ballerina run time distribution zip file to this folder
 1. Run the following command to build the base docker image.
 
-```docker build --no-cache=true --squash --build-arg BALLERINA_DIST=<ballerina-tools-0.96.1-SNAPSHOT.zip> -t 
-ballerina/b7a:latest .```
+```docker build --no-cache=true --squash --build-arg BALLERINA_DIST=<ballerina-tools-0.962.0.zip> -t ballerina/b7a:latest .```

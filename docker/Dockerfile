@@ -15,23 +15,10 @@
 # -----------------------------------------------------------------------
 
 FROM openjdk:jre-alpine
-LABEL maintainer "tryballerina@gmail.com"
+MAINTAINER ballerina Maintainers "dev@ballerina.io"
 
 # Ballerina runtime distribution filename.
 ARG BALLERINA_DIST
-
-# Labels.
-LABEL org.label-schema.schema-version="1.0"
-LABEL org.label-schema.build-date=$BUILD_DATE
-LABEL org.label-schema.name="ballerinalang/ballerina"
-LABEL org.label-schema.description="Ballerina language runtime"
-LABEL org.label-schema.url="http://ballerinalang.org/"
-LABEL org.label-schema.vcs-url="https://github.com/ballerinalang/ballerina"
-LABEL org.label-schema.vcs-ref=$VCS_REF
-LABEL org.label-schema.vendor="WSO2"
-LABEL org.label-schema.version=$BUILD_VERSION
-LABEL org.label-schema.docker.cmd="docker run -v ~/ballerina/packages:/ballerina/files -p 9090:9090 -d ballerinalang/ballerina"
-
 
 # Add Ballerina runtime.
 COPY ${BALLERINA_DIST} /root/
@@ -40,8 +27,9 @@ COPY ${BALLERINA_DIST} /root/
 RUN mkdir -p /ballerina/files \
     && addgroup troupe \
     && adduser -S -s /bin/bash -g 'ballerina' -G troupe -D ballerina \
-    && apk add --update bash \
+    && apk add --update --no-cache bash \
     && unzip /root/${BALLERINA_DIST} -d /ballerina/ > /dev/null 2>&1 \
+    && apk del unzip\
     && mv /ballerina/ballerina* /ballerina/runtime \
     && mkdir -p /ballerina/runtime/logs \
     && chown -R ballerina:troupe /ballerina \
@@ -50,7 +38,6 @@ RUN mkdir -p /ballerina/files \
 
 ENV BALLERINA_HOME /ballerina/runtime
 ENV PATH $BALLERINA_HOME/bin:$PATH
-
 
 WORKDIR /home/ballerina
 

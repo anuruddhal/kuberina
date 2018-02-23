@@ -35,7 +35,6 @@ import org.ballerinalang.util.codegen.ServiceInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -50,6 +49,7 @@ import java.util.stream.Collectors;
 
 import static org.ballerinalang.artifactgen.ArtifactGenConstants.DEPLOYMENT_LIVENESS_ENABLE;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.extractPorts;
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printDebug;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printInfo;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printInstruction;
@@ -60,8 +60,6 @@ import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printSuccess;
  */
 class ArtifactGenerator {
 
-    private static final PrintStream out = System.out;
-    private static final PrintStream error = System.err;
     private static final String KUBERNETES = "kubernetes";
     private static final String DOCKER = "docker";
     private static final String BALX = ".balx";
@@ -129,7 +127,7 @@ class ArtifactGenerator {
         nameValue = (registry != null) ? registry + "/" + nameValue + ":" + tag : nameValue + ":" + tag;
         dockerModel.setName(nameValue);
 
-        printInfo(dockerModel.toString());
+        printDebug(dockerModel.toString());
         createDockerArtifacts(dockerModel, balxFilePath, outputDir);
         printDockerInstructions(dockerModel.getName());
     }
@@ -176,7 +174,7 @@ class ArtifactGenerator {
         dockerModel.setImageBuild(imageBuild);
         createDockerArtifacts(dockerModel, balxFilePath, outputDir + File.separator + KUBERNETES + File
                 .separator + DOCKER);
-        printInfo(deploymentModel.toString());
+        printDebug(deploymentModel.toString());
         createDeploymentArtifacts(deploymentModel, outputDir, balxFilePath);
         printKubernetesInstructions(outputDir);
     }
@@ -208,7 +206,7 @@ class ArtifactGenerator {
         String labels = svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_LABELS) != null ?
                 svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_LABELS).getStringValue() :
                 null;
-        serviceModel.setLabels(getEnvVars(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
+        serviceModel.setLabels(getLabelMap(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
 
         String serviceType = svcAnnotationInfo.getAttributeValue(ArtifactGenConstants.SVC_SERVICE_TYPE)
                 != null ?
@@ -229,7 +227,7 @@ class ArtifactGenerator {
             ports.add(9090);
         }
 
-        printInfo(serviceModel.toString());
+        printDebug(serviceModel.toString());
         try {
             String svcContent = KubernetesServiceGenerator.generate(serviceModel);
             ArtifactGenUtils.writeToFile(svcContent, outputDir + File.separator + KUBERNETES + File
@@ -270,7 +268,7 @@ class ArtifactGenerator {
         String labels = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_LABELS) != null ?
                 ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_LABELS).getStringValue() :
                 null;
-        ingressModel.setLabels(getEnvVars(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
+        ingressModel.setLabels(getLabelMap(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
 
         String ingressClass = ingressAnnotationInfo.getAttributeValue(ArtifactGenConstants.INGRESS_CLASS)
                 != null ?
@@ -300,7 +298,7 @@ class ArtifactGenerator {
         ingressModel.setServiceName(svc.getName());
         ingressModel.setServicePort(svc.getPort());
 
-        printInfo(ingressModel.toString());
+        printDebug(ingressModel.toString());
         try {
             String svcContent = KubernetesIngressGenerator.generate(ingressModel);
             ArtifactGenUtils.writeToFile(svcContent, outputDir + File.separator + KUBERNETES + File
@@ -320,7 +318,7 @@ class ArtifactGenerator {
      * @param outputFileName output file name parameter added to the selector.
      * @return Map of labels with selector.
      */
-    private static Map<String, String> getEnvVars(String labels, String outputFileName) {
+    private static Map<String, String> getLabelMap(String labels, String outputFileName) {
         Map<String, String> labelMap = new HashMap<>();
         if (labels != null) {
             labelMap = Pattern.compile("\\s*,\\s*")
@@ -333,10 +331,10 @@ class ArtifactGenerator {
     }
 
     /**
-     * Generate env map by splitting the env string.
+     * Generate environment variable map by splitting the env string.
      *
      * @param env env string.
-     * @return Map of env variables.
+     * @return Map of environment variables.
      */
     private static Map<String, String> getEnvVars(String env) {
         if (env == null) {
@@ -414,7 +412,7 @@ class ArtifactGenerator {
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_LABELS).getStringValue() :
                 null;
 
-        deploymentModel.setLabels(getEnvVars(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
+        deploymentModel.setLabels(getLabelMap(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
 
         String envVars = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_ENV_VARS) != null ?
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_ENV_VARS).getStringValue() :
@@ -429,7 +427,7 @@ class ArtifactGenerator {
         String dockerContent = DockerGenerator.generate(dockerModel);
         try {
             ArtifactGenUtils.writeToFile(dockerContent, outputDir + File.separator + "Dockerfile");
-            printInfo("Dockerfile generation completed.");
+            printSuccess("Dockerfile generated.");
             String balxDestination = outputDir + File.separator + ArtifactGenUtils.extractBalxName
                     (balxFilePath) + BALX;
             ArtifactGenUtils.copyFile(balxFilePath, balxDestination);
@@ -437,7 +435,9 @@ class ArtifactGenerator {
                 printInfo("Building docker image ....");
                 DockerGenerator.buildImage(dockerModel.getName(), outputDir);
                 Files.delete(Paths.get(balxDestination));
-                printSuccess("Docker image building completed.");
+                if (dockerModel.isPush()) {
+                    DockerGenerator.pushImage(dockerModel);
+                }
             }
         } catch (IOException e) {
             printError("Unable to write Dockerfile content to " + outputDir);
@@ -461,13 +461,13 @@ class ArtifactGenerator {
     }
 
     private static void printDockerInstructions(String dockerImageName) {
-        printInstruction("Run following command to start docker container: ");
+        printInstruction("\nRun following command to start docker container: ");
         printInstruction("docker run -d -p 9090:9090 " + dockerImageName);
 
     }
 
     private static void printKubernetesInstructions(String outputDir) {
-        printInstruction("Run following command to deploy kubernetes artifacts: ");
+        printInstruction("\nRun following command to deploy kubernetes artifacts: ");
         printInstruction("kubectl create -f " + outputDir + KUBERNETES);
     }
 }

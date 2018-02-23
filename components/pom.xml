@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>kuberina-components</artifactId>
     <packaging>pom</packaging>
-    <name>Ballerina - Kubernetes Components</name>
+    <name>Kuberina - Artifact Generator Components</name>
     <url>http://ballerinalang.org</url>
 
    <modules>

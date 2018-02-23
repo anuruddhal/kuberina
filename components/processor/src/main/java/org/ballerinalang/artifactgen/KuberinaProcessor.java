@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printDebug;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printInfo;
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printWarn;
@@ -84,7 +85,7 @@ public class KuberinaProcessor extends AbstractCompilerPlugin {
                         }
                     }
                     if (serviceAnnotation != null) {
-                        printInfo("Processing svc{} annotation for :" + serviceInfo.getName());
+                        printInfo("Processing svc{} annotation for:" + serviceInfo.getName());
                         String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
                                 .extractBalxName(filePath)
                                 + File.separator;
@@ -92,7 +93,7 @@ public class KuberinaProcessor extends AbstractCompilerPlugin {
                     }
                     if (dockerAnnotation != null) {
                         if (dockerCount < 1) {
-                            printInfo("Processing docker{} annotation for : " + serviceInfo.getName());
+                            printInfo("Processing docker{} annotation for: " + serviceInfo.getName());
                             dockerCount += 1;
                             dockerAnnotatedService = serviceInfo;
                         } else {
@@ -111,7 +112,7 @@ public class KuberinaProcessor extends AbstractCompilerPlugin {
                 if (dockerAnnotatedService != null) {
                     String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File
                             .separator;
-                    printInfo("Output Directory " + targetPath);
+                    printDebug("Output Directory " + targetPath);
                     ArtifactGenerator.
                             processDockerAnnotationForService(dockerAnnotatedService, filePath, targetPath);
                 }

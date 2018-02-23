@@ -18,7 +18,6 @@
 
 package org.ballerinalang.artifactgen.utils;
 
-import org.ballerinalang.artifactgen.ArtifactGenConstants;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.util.codegen.AnnAttachmentInfo;
 import org.ballerinalang.util.codegen.AnnAttributeValue;
@@ -40,8 +39,8 @@ import java.util.List;
  */
 public class ArtifactGenUtils {
 
-    private static final boolean debugEnabled = "true".equals(System.getProperty(
-            ArtifactGenConstants.ENABLE_DEBUG_LOGS));
+    private static final boolean debugEnabled = true;
+    //"true".equals(System.getProperty(ArtifactGenConstants.ENABLE_DEBUG_LOGS));
     private static final PrintStream error = System.err;
     private static final PrintStream out = System.out;
 
@@ -119,6 +118,7 @@ public class ArtifactGenUtils {
         ports.add(9090);
         return ports;
     }
+
     public static String extractBalxName(String balxFilePath) {
         return balxFilePath.substring(balxFilePath.lastIndexOf(File.separator) + 1, balxFilePath.lastIndexOf("" +
                 ".balx"));
@@ -132,29 +132,35 @@ public class ArtifactGenUtils {
 
     public static void printWarn(String msg) {
         String ansiReset = "\u001B[0m";
-        String ansiYELLOW = "\u001B[33m";
-        out.println(ansiYELLOW + "warning: " + msg + ansiReset);
+        String ansiYellow = "\u001B[33m";
+        out.println(ansiYellow + "warning: " + msg + ansiReset);
     }
 
     public static void printSuccess(String msg) {
         if (debugEnabled) {
             String ansiReset = "\u001B[0m";
-            String ansiGREEN = "\u001B[32m";
-            out.println(ansiGREEN + "success: " + msg + ansiReset);
+            String ansiGreen = "\u001B[32m";
+            out.println(ansiGreen + "success: " + msg + ansiReset);
         }
     }
 
     public static void printInfo(String msg) {
         if (debugEnabled) {
-            String ansiReset = "\u001B[0m";
-            String ansiBLUE = "\u001B[34m";
-            out.println(ansiBLUE + "info: " + msg + ansiReset);
+            out.println("info: " + msg);
+        }
+    }
+
+    public static void printDebug(String msg) {
+        String ansiReset = "\u001B[0m";
+        String ansiBlue = "\u001B[34m";
+        if (debugEnabled) {
+            out.println(ansiBlue + "debug: " + msg + ansiReset);
         }
     }
 
     public static void printInstruction(String msg) {
         String ansiReset = "\u001B[0m";
-        String ansiBLUE = "\u001B[34m";
-        out.println(ansiBLUE + msg + ansiReset);
+        String ansiCyan = "\u001B[46m";
+        out.println(ansiCyan + msg + ansiReset);
     }
 }
