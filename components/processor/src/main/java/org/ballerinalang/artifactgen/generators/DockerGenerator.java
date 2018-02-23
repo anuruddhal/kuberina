@@ -23,17 +23,9 @@ import io.fabric8.docker.client.ConfigBuilder;
 import io.fabric8.docker.client.DockerClient;
 import io.fabric8.docker.dsl.EventListener;
 import io.fabric8.docker.dsl.OutputHandle;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.log.NullLogChute;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.ballerinalang.artifactgen.models.DockerModel;
 
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringWriter;
 import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
@@ -44,12 +36,7 @@ import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
 public class DockerGenerator {
 
     private static final String LOCAL_DOCKER_DAEMON_SOCKET = "unix:///var/run/docker.sock";
-    private static final String DOCKER_VELOCITY_TEMPLATE = "templates/Dockerfile.template";
     private static final CountDownLatch buildDone = new CountDownLatch(1);
-    private static final String VELOCITY_FILE_NAME_VARIABLE = "fileName";
-    private static final String VELOCITY_FILE_PATH_VARIABLE = "filePath";
-    private static final String VELOCITY_SERVICE_VARIABLE = "isService";
-    private static final PrintStream out = System.out;
 
     /**
      * Generate Dockerfile based on annotations using velocity template.
@@ -58,25 +45,38 @@ public class DockerGenerator {
      * @return Dockerfile content as a string
      */
     public static String generate(DockerModel dockerModel) {
-        VelocityEngine velocityEngine = new VelocityEngine();
-        velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
-        velocityEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-        velocityEngine.setProperty(
-                RuntimeConstants.RUNTIME_LOG_LOGSYSTEM,
-                new NullLogChute()
-        );
-        velocityEngine.init();
-        Template template = velocityEngine.getTemplate(DOCKER_VELOCITY_TEMPLATE);
-        VelocityContext context = new VelocityContext();
-        context.put(VELOCITY_FILE_NAME_VARIABLE, dockerModel.getBalxFileName());
-        context.put(VELOCITY_SERVICE_VARIABLE, dockerModel.isService());
-        context.put(VELOCITY_FILE_PATH_VARIABLE, dockerModel.getBalxFileName());
+        String dockerBase = "# --------------------------------------------------------------------\n" +
+                "# Copyright (c) 2018, WSO2 Inc. (http://wso2.com) All Rights Reserved.\n" +
+                "#\n" +
+                "# Licensed under the Apache License, Version 2.0 (the \"License\");\n" +
+                "# you may not use this file except in compliance with the License.\n" +
+                "# You may obtain a copy of the License at\n" +
+                "#\n" +
+                "# http://www.apache.org/licenses/LICENSE-2.0\n" +
+                "#\n" +
+                "# Unless required by applicable law or agreed to in writing, software\n" +
+                "# distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
+                "# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
+                "# See the License for the specific language governing permissions and\n" +
+                "# limitations under the License.\n" +
+                "# -----------------------------------------------------------------------\n" +
+                "\n" +
+                "FROM ballerina/b7a:latest\n" +
+                "MAINTAINER ballerina Maintainers \"dev@ballerina.io\"\n" +
+                "\n" +
+                "COPY " + dockerModel.getBalxFileName() + " /home/ballerina \n\n";
+
+        StringBuffer stringBuffer = new StringBuffer(dockerBase);
         if (dockerModel.isService()) {
-            context.put("ports", dockerModel.getPorts());
+            stringBuffer.append("EXPOSE ");
+            dockerModel.getPorts().forEach(port -> {
+                stringBuffer.append(" ").append(port);
+            });
+            stringBuffer.append("\n\nCMD ballerina run -s ").append(dockerModel.getBalxFileName());
+        } else {
+            stringBuffer.append("CMD ballerina run ").append(dockerModel.getBalxFileName());
         }
-        StringWriter writer = new StringWriter();
-        template.merge(context, writer);
-        return writer.toString();
+        return stringBuffer.toString();
     }
 
     /**
