@@ -29,7 +29,6 @@ RUN mkdir -p /ballerina/files \
     && adduser -S -s /bin/bash -g 'ballerina' -G troupe -D ballerina \
     && apk add --update --no-cache bash \
     && unzip /root/${BALLERINA_DIST} -d /ballerina/ > /dev/null 2>&1 \
-    && apk del unzip\
     && mv /ballerina/ballerina* /ballerina/runtime \
     && mkdir -p /ballerina/runtime/logs \
     && chown -R ballerina:troupe /ballerina \
