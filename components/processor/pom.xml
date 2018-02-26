@@ -102,7 +102,7 @@
                 </excludes>
             </resource>
 
-            <!-- copy built-in ballerina sources to the jar -->
+            <!-- copy ballerina annotation sources to the jar -->
             <resource>
                 <directory>${generated.ballerina.source.directory}</directory>
                 <targetPath>META-INF/natives</targetPath>

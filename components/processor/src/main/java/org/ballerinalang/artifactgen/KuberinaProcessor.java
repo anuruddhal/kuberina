@@ -57,10 +57,9 @@ public class KuberinaProcessor extends AbstractCompilerPlugin {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bFile);
             ProgramFile programFile = reader.readProgram(byteArrayInputStream);
             PackageInfo packageInfos[] = programFile.getPackageInfoEntries();
-            ServiceInfo serviceInfos[];
 
             for (PackageInfo packageInfo : packageInfos) {
-                serviceInfos = packageInfo.getServiceInfoEntries();
+                ServiceInfo serviceInfos[] = packageInfo.getServiceInfoEntries();
                 int dockerCount = 0;
                 int deploymentCount = 0;
                 ServiceInfo deploymentAnnotatedService = null;

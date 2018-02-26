@@ -48,6 +48,8 @@ public class DockerGeneratorTests {
         dockerModel.setPorts(ports);
         dockerModel.setService(true);
         dockerModel.setBalxFileName("example.balx");
+        dockerModel.setDebugEnable(true);
+        dockerModel.setDebugPort(5005);
 
         String dockerfileContent = DockerGenerator.generate(dockerModel);
         File dockerfile = new File("target/kubernetes/docker");

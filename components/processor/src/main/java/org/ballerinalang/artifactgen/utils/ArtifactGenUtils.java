@@ -18,6 +18,7 @@
 
 package org.ballerinalang.artifactgen.utils;
 
+import org.ballerinalang.artifactgen.ArtifactGenConstants;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.util.codegen.AnnAttachmentInfo;
 import org.ballerinalang.util.codegen.AnnAttributeValue;
@@ -39,8 +40,8 @@ import java.util.List;
  */
 public class ArtifactGenUtils {
 
-    private static final boolean debugEnabled = true;
-    //"true".equals(System.getProperty(ArtifactGenConstants.ENABLE_DEBUG_LOGS));
+    private static final boolean debugEnabled = "true".equals(System.getProperty
+            (ArtifactGenConstants.ENABLE_DEBUG_LOGS));
     private static final PrintStream error = System.err;
     private static final PrintStream out = System.out;
 

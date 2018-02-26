@@ -70,6 +70,8 @@ class ArtifactGenerator {
     private static final String DOCKER_LATEST_TAG = ":latest";
     private static final String INGRESS_CLASS_NGINX = "nginx";
     private static final String INGRESS_HOSTNAME_POSTFIX = ".com";
+    private static final String DEFAULT_BASE_IMAGE = "ballerina/b7a:latest";
+    private static final int DEFAULT_DEBUG_PORT = 5005;
     private static Set<Integer> ports = new HashSet<>();
 
     /**
@@ -119,7 +121,25 @@ class ArtifactGenerator {
                 .DOCKER_PUSH) != null && dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
                 .DOCKER_PUSH).getBooleanValue();
         dockerModel.setPush(push);
-        dockerModel.setPorts(extractPorts(serviceInfo));
+
+        String baseImage = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DOCKER_BASE_IMAGE) != null ? dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DOCKER_BASE_IMAGE).getStringValue() : DEFAULT_BASE_IMAGE;
+        dockerModel.setBaseImage(baseImage);
+
+        boolean debugEnable = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DOCKER_DEBUG_ENABLE) != null && dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DOCKER_DEBUG_ENABLE).getBooleanValue();
+        List<Integer> ports = extractPorts(serviceInfo);
+        dockerModel.setDebugEnable(debugEnable);
+        if (debugEnable) {
+            int debugPort = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_DEBUG_PORT) != null ?
+                    Math.toIntExact(dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_DEBUG_PORT)
+                            .getIntValue()) : DEFAULT_DEBUG_PORT;
+            dockerModel.setDebugPort(debugPort);
+            ports.add(debugPort);
+        }
+        dockerModel.setPorts(ports);
 
         String nameValue = dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME) != null ?
                 dockerAnnotationInfo.getAttributeValue(ArtifactGenConstants.DOCKER_NAME).getStringValue() :
@@ -129,7 +149,7 @@ class ArtifactGenerator {
 
         printDebug(dockerModel.toString());
         createDockerArtifacts(dockerModel, balxFilePath, outputDir);
-        printDockerInstructions(dockerModel.getName());
+        printDockerInstructions(dockerModel);
     }
 
     /**
@@ -153,7 +173,9 @@ class ArtifactGenerator {
                 Math.toIntExact(deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
                         .DEPLOYMENT_LIVENESS_PORT).getIntValue()) : ArtifactGenUtils.extractPort(serviceInfo);
         deploymentModel.setLivenessPort(livenessPort);
-
+        String baseImage = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DOCKER_BASE_IMAGE) != null ? deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants
+                .DOCKER_BASE_IMAGE).getStringValue() : DEFAULT_BASE_IMAGE;
         String image = deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE)
                 != null ?
                 deploymentAnnotationInfo.getAttributeValue(ArtifactGenConstants.DEPLOYMENT_IMAGE).getStringValue() :
@@ -164,8 +186,10 @@ class ArtifactGenerator {
         deploymentModel.setImage(image);
         DockerModel dockerModel = new DockerModel();
         String imageTag = image.substring(image.lastIndexOf(":") + 1, image.length());
+        dockerModel.setBaseImage(baseImage);
         dockerModel.setName(image);
         dockerModel.setTag(imageTag);
+        dockerModel.setDebugEnable(false);
         String balxFileName = ArtifactGenUtils.extractBalxName(balxFilePath) + BALX;
         dockerModel.setBalxFileName(balxFileName);
         dockerModel.setBalxFilePath(balxFileName);
@@ -460,9 +484,14 @@ class ArtifactGenerator {
         }
     }
 
-    private static void printDockerInstructions(String dockerImageName) {
+    private static void printDockerInstructions(DockerModel dockerModel) {
         printInstruction("\nRun following command to start docker container: ");
-        printInstruction("docker run -d -p 9090:9090 " + dockerImageName);
+        StringBuilder command = new StringBuilder("docker run -d ");
+        dockerModel.getPorts().forEach(port -> {
+            command.append("-p " + port + ":" + port + " ");
+        });
+        command.append(dockerModel.getName());
+        printInstruction(command.toString());
 
     }
 

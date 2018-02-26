@@ -66,7 +66,7 @@ public class DockerGenerator {
                 "# limitations under the License.\n" +
                 "# -----------------------------------------------------------------------\n" +
                 "\n" +
-                "FROM ballerina/b7a:latest\n" +
+                "FROM " + dockerModel.getBaseImage() + "\n" +
                 "MAINTAINER ballerina Maintainers \"dev@ballerina.io\"\n" +
                 "\n" +
                 "COPY " + dockerModel.getBalxFileName() + " /home/ballerina \n\n";
@@ -78,6 +78,9 @@ public class DockerGenerator {
             stringBuffer.append("\n\nCMD ballerina run -s ").append(dockerModel.getBalxFileName());
         } else {
             stringBuffer.append("CMD ballerina run ").append(dockerModel.getBalxFileName());
+        }
+        if (dockerModel.isDebugEnable()) {
+            stringBuffer.append(" --debug ").append(dockerModel.getDebugPort());
         }
         return stringBuffer.toString();
     }
@@ -92,7 +95,10 @@ public class DockerGenerator {
      */
     public static void buildImage(String imageName, String dockerDir) throws
             InterruptedException, IOException {
-        DockerClient client = getDockerClient();
+        Config dockerClientConfig = new ConfigBuilder()
+                .withDockerUrl(LOCAL_DOCKER_DAEMON_SOCKET)
+                .build();
+        DockerClient client = new io.fabric8.docker.client.DefaultDockerClient(dockerClientConfig);
         final CountDownLatch buildDone = new CountDownLatch(1);
         OutputHandle buildHandle = client.image()
                 .build()
@@ -138,13 +144,11 @@ public class DockerGenerator {
      */
     public static void pushImage(DockerModel dockerModel) throws InterruptedException, IOException {
 
-        String dockerUrl = LOCAL_DOCKER_DAEMON_SOCKET;
-
         AuthConfig authConfig = new AuthConfigBuilder().withUsername(dockerModel.getUsername()).withPassword
                 (dockerModel.getPassword())
                 .build();
         Config config = new ConfigBuilder()
-                .withDockerUrl(dockerUrl)
+                .withDockerUrl(LOCAL_DOCKER_DAEMON_SOCKET)
                 .addToAuthConfigs(RegistryUtils.extractRegistry(dockerModel.getName()), authConfig)
                 .build();
 
@@ -182,20 +186,4 @@ public class DockerGenerator {
         handle.close();
         client.close();
     }
-
-    /**
-     * Creates a {@link DockerClient} from the given Docker host URL.
-     *
-     * @return {@link DockerClient} object.
-     */
-    private static DockerClient getDockerClient() {
-        DockerClient client;
-        Config dockerClientConfig = new ConfigBuilder()
-                .withDockerUrl(LOCAL_DOCKER_DAEMON_SOCKET)
-                .build();
-
-        client = new io.fabric8.docker.client.DefaultDockerClient(dockerClientConfig);
-        return client;
-    }
-
 }

@@ -24,6 +24,8 @@ import java.util.List;
  * Docker annotations model class.
  */
 public class DockerModel {
+    private boolean debugEnable;
+    private int debugPort;
     private String name;
     private String registry;
     private String tag;
@@ -34,6 +36,7 @@ public class DockerModel {
     private boolean push;
     private boolean isService;
     private boolean imageBuild;
+    private String baseImage;
     private List<Integer> ports;
 
     public String getName() {
@@ -108,22 +111,6 @@ public class DockerModel {
         isService = service;
     }
 
-    @Override
-    public String toString() {
-        return "DockerModel{" +
-                "name='" + name + '\'' +
-                ", registry='" + registry + '\'' +
-                ", tag='" + tag + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", balxFileName='" + balxFileName + '\'' +
-                ", balxFilePath='" + balxFilePath + '\'' +
-                ", push=" + push +
-                ", isService=" + isService +
-                ", ports=" + ports +
-                '}';
-    }
-
     public String getBalxFilePath() {
         return balxFilePath;
     }
@@ -138,5 +125,49 @@ public class DockerModel {
 
     public void setImageBuild(boolean imageBuild) {
         this.imageBuild = imageBuild;
+    }
+
+    public String getBaseImage() {
+        return baseImage;
+    }
+
+    public void setBaseImage(String baseImage) {
+        this.baseImage = baseImage;
+    }
+
+    public boolean isDebugEnable() {
+        return debugEnable;
+    }
+
+    public void setDebugEnable(boolean debugEnable) {
+        this.debugEnable = debugEnable;
+    }
+
+    public int getDebugPort() {
+        return debugPort;
+    }
+
+    public void setDebugPort(int debugPort) {
+        this.debugPort = debugPort;
+    }
+
+    @Override
+    public String toString() {
+        return "DockerModel{" +
+                "debugEnable=" + debugEnable +
+                ", debugPort=" + debugPort +
+                ", name='" + name + '\'' +
+                ", registry='" + registry + '\'' +
+                ", tag='" + tag + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", balxFileName='" + balxFileName + '\'' +
+                ", balxFilePath='" + balxFilePath + '\'' +
+                ", push=" + push +
+                ", isService=" + isService +
+                ", imageBuild=" + imageBuild +
+                ", baseImage='" + baseImage + '\'' +
+                ", ports=" + ports +
+                '}';
     }
 }
