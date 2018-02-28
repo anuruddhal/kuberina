@@ -26,23 +26,28 @@ import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.artifactgen.models.ServiceModel;
 
 import java.io.IOException;
-import java.io.PrintStream;
+
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
 
 
 /**
- * Generates kubernetes Service from annotations.
+ * Generates kubernetes service from annotations.
  */
-public class KubernetesServiceGenerator {
+public class KubernetesServiceGenerator implements ArtifactGenerator {
 
-    private static final PrintStream out = System.out;
+    private ServiceModel serviceModel;
+
+    public KubernetesServiceGenerator(ServiceModel serviceModel) {
+        this.serviceModel = serviceModel;
+    }
 
     /**
      * Generate kubernetes service definition from annotation.
      *
-     * @param serviceModel {@link ServiceModel} object
      * @return Generated kubernetes service yaml as a string
+     * @throws ArtifactGenerationException If an error occurs while generating artifact.
      */
-    public static String generate(ServiceModel serviceModel) throws ArtifactGenerationException {
+    public String generate() throws ArtifactGenerationException {
         Service service = new ServiceBuilder()
                 .withNewMetadata()
                 .withName(serviceModel.getName())
@@ -63,7 +68,7 @@ public class KubernetesServiceGenerator {
             serviceYAML = SerializationUtils.dumpWithoutRuntimeStateAsYaml(service);
         } catch (IOException e) {
             String errorMessage = "Error while generating yaml file for service: " + serviceModel.getName();
-            out.println(errorMessage);
+            printError(errorMessage);
             throw new ArtifactGenerationException(errorMessage, e);
         }
         return serviceYAML;

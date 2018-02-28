@@ -30,7 +30,7 @@ public class ArtifactGenConstants {
     public static final String KUBERNETES_ANNOTATION_PACKAGE = "ballerina.kubernetes";
     public static final String DOCKER_ANNOTATION_PACKAGE = "ballerina.docker";
     public static final String DEPLOYMENT_ANNOTATION = "deployment";
-    public static final String EXTERNAL_DEPLOYMENT_ANNOTATION = "externalDeployment";
+    public static final String HPA_ANNOTATION = "hpa";
     public static final String SERVICE_ANNOTATION = "svc";
     public static final String INGRESS_ANNOTATION = "ingress";
     public static final String DOCKER_ANNOTATION = "configuration";
@@ -81,5 +81,13 @@ public class ArtifactGenConstants {
     public static final String INGRESS_TARGET_PATH = "targetPath";
     public static final String INGRESS_CLASS = "ingressClass";
     public static final String INGRESS_ENABLE_TLS = "enableTLS";
+
+    //Kubernetes Pod Autoscaler constants
+    public static final String AUTOSCALER_NAME = "name";
+    public static final String AUTOSCALER_LABELS = "labels";
+    public static final String AUTOSCALER_MIN_REPLICAS = "minReplicas";
+    public static final String AUTOSCALER_MAX_REPLICAS = "maxReplicas";
+    public static final String AUTOSCALER_CPU_PERCENTAGE = "cpuPercentage";
+    public static final String AUTOSCALER_DEPLOYMENT = "deployment";
 
 }

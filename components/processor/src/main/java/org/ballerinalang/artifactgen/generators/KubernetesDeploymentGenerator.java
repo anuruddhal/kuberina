@@ -36,27 +36,81 @@ import org.ballerinalang.artifactgen.ArtifactGenConstants;
 import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.artifactgen.models.DeploymentModel;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.ballerinalang.artifactgen.ArtifactGenConstants.DEPLOYMENT_LIVENESS_DISABLE;
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
 
 /**
  * Generates kubernetes deployment from annotations.
  */
-public class KubernetesDeploymentGenerator {
+public class KubernetesDeploymentGenerator implements ArtifactGenerator {
 
-    private static final PrintStream out = System.out;
+    private DeploymentModel deploymentModel;
+
+    public KubernetesDeploymentGenerator(DeploymentModel deploymentModel) {
+        this.deploymentModel = deploymentModel;
+    }
+
+    private List<ContainerPort> populatePorts(List<Integer> ports) {
+        List<ContainerPort> containerPorts = new ArrayList<>();
+        for (int port : ports) {
+            ContainerPort containerPort = new ContainerPortBuilder()
+                    .withContainerPort(port)
+                    .withProtocol(ArtifactGenConstants.KUBERNETES_SVC_PROTOCOL)
+                    .build();
+            containerPorts.add(containerPort);
+        }
+        return containerPorts;
+    }
+
+    private Container generateContainer(DeploymentModel deploymentModel, List<ContainerPort>
+            containerPorts) {
+        return new ContainerBuilder()
+                .withName(deploymentModel.getName())
+                .withImage(deploymentModel.getImage())
+                .withImagePullPolicy(deploymentModel.getImagePullPolicy())
+                .withPorts(containerPorts)
+                .withEnv(populateEnvVar(deploymentModel.getEnv()))
+                .withLivenessProbe(generateLivenessProbe(deploymentModel))
+                .build();
+    }
+
+    private List<EnvVar> populateEnvVar(Map<String, String> envMap) {
+        List<EnvVar> envVars = new ArrayList<>();
+        if (envMap == null) {
+            return envVars;
+        }
+        envMap.forEach((k, v) -> {
+            EnvVar envVar = new EnvVarBuilder().withName(k).withValue(v).build();
+            envVars.add(envVar);
+        });
+        return envVars;
+    }
+
+    private Probe generateLivenessProbe(DeploymentModel deploymentModel) {
+        if (DEPLOYMENT_LIVENESS_DISABLE.equals(deploymentModel.getLiveness())) {
+            return null;
+        }
+        TCPSocketAction tcpSocketAction = new TCPSocketActionBuilder()
+                .withNewPort(deploymentModel.getLivenessPort())
+                .build();
+        return new ProbeBuilder()
+                .withInitialDelaySeconds(deploymentModel.getInitialDelaySeconds())
+                .withPeriodSeconds(deploymentModel.getPeriodSeconds())
+                .withTcpSocket(tcpSocketAction)
+                .build();
+    }
 
     /**
      * Generate kubernetes deployment definition from annotation.
      *
-     * @param deploymentModel {@link DeploymentModel} object
      * @return Generated kubernetes @{@link Deployment} definition
+     * @throws ArtifactGenerationException If an error occurs while generating artifact.
      */
-    public static String generate(DeploymentModel deploymentModel) throws ArtifactGenerationException {
+    public String generate() throws ArtifactGenerationException {
         List<ContainerPort> containerPorts = null;
         if (deploymentModel.getPorts() != null) {
             containerPorts = populatePorts(deploymentModel.getPorts());
@@ -85,60 +139,10 @@ public class KubernetesDeploymentGenerator {
             deploymentYAML = SerializationUtils.dumpWithoutRuntimeStateAsYaml(deployment);
         } catch (JsonProcessingException e) {
             String errorMessage = "Error while parsing yaml file for deployment: " + deploymentModel.getName();
-            out.println(errorMessage);
+            printError(errorMessage);
             throw new ArtifactGenerationException(errorMessage, e);
         }
         return deploymentYAML;
-    }
-
-    private static List<ContainerPort> populatePorts(List<Integer> ports) {
-        List<ContainerPort> containerPorts = new ArrayList<>();
-        for (int port : ports) {
-            ContainerPort containerPort = new ContainerPortBuilder()
-                    .withContainerPort(port)
-                    .withProtocol(ArtifactGenConstants.KUBERNETES_SVC_PROTOCOL)
-                    .build();
-            containerPorts.add(containerPort);
-        }
-        return containerPorts;
-    }
-
-    private static Container generateContainer(DeploymentModel deploymentModel, List<ContainerPort>
-            containerPorts) {
-        return new ContainerBuilder()
-                .withName(deploymentModel.getName())
-                .withImage(deploymentModel.getImage())
-                .withImagePullPolicy(deploymentModel.getImagePullPolicy())
-                .withPorts(containerPorts)
-                .withEnv(populateEnvVar(deploymentModel.getEnv()))
-                .withLivenessProbe(generateLivenessProbe(deploymentModel))
-                .build();
-    }
-
-    private static List<EnvVar> populateEnvVar(Map<String, String> envMap) {
-        List<EnvVar> envVars = new ArrayList<>();
-        if (envMap == null) {
-            return envVars;
-        }
-        envMap.forEach((k, v) -> {
-            EnvVar envVar = new EnvVarBuilder().withName(k).withValue(v).build();
-            envVars.add(envVar);
-        });
-        return envVars;
-    }
-
-    private static Probe generateLivenessProbe(DeploymentModel deploymentModel) {
-        if (DEPLOYMENT_LIVENESS_DISABLE.equals(deploymentModel.getLiveness())) {
-            return null;
-        }
-        TCPSocketAction tcpSocketAction = new TCPSocketActionBuilder()
-                .withNewPort(deploymentModel.getLivenessPort())
-                .build();
-        return new ProbeBuilder()
-                .withInitialDelaySeconds(deploymentModel.getInitialDelaySeconds())
-                .withPeriodSeconds(deploymentModel.getPeriodSeconds())
-                .withTcpSocket(tcpSocketAction)
-                .build();
     }
 }
 

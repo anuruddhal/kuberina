@@ -39,50 +39,13 @@ import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printSuccess;
 /**
  * Generates Docker artifacts from annotations.
  */
-public class DockerGenerator {
+public class DockerGenerator implements ArtifactGenerator {
 
     private static final String LOCAL_DOCKER_DAEMON_SOCKET = "unix:///var/run/docker.sock";
+    private DockerModel dockerModel;
 
-    /**
-     * Generate Dockerfile based on annotations using velocity template.
-     *
-     * @param dockerModel {@link DockerModel} object
-     * @return Dockerfile content as a string
-     */
-    public static String generate(DockerModel dockerModel) {
-        String dockerBase = "# --------------------------------------------------------------------\n" +
-                "# Copyright (c) 2018, Ballerina (https://ballerina.io/) All Rights Reserved.\n" +
-                "#\n" +
-                "# Licensed under the Apache License, Version 2.0 (the \"License\");\n" +
-                "# you may not use this file except in compliance with the License.\n" +
-                "# You may obtain a copy of the License at\n" +
-                "#\n" +
-                "# http://www.apache.org/licenses/LICENSE-2.0\n" +
-                "#\n" +
-                "# Unless required by applicable law or agreed to in writing, software\n" +
-                "# distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
-                "# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
-                "# See the License for the specific language governing permissions and\n" +
-                "# limitations under the License.\n" +
-                "# -----------------------------------------------------------------------\n" +
-                "\n" +
-                "FROM " + dockerModel.getBaseImage() + "\n" +
-                "MAINTAINER ballerina Maintainers \"dev@ballerina.io\"\n" +
-                "\n" +
-                "COPY " + dockerModel.getBalxFileName() + " /home/ballerina \n\n";
-
-        StringBuilder stringBuffer = new StringBuilder(dockerBase);
-        if (dockerModel.isService()) {
-            stringBuffer.append("EXPOSE ");
-            dockerModel.getPorts().forEach(port -> stringBuffer.append(" ").append(port));
-            stringBuffer.append("\n\nCMD ballerina run -s ").append(dockerModel.getBalxFileName());
-        } else {
-            stringBuffer.append("CMD ballerina run ").append(dockerModel.getBalxFileName());
-        }
-        if (dockerModel.isDebugEnable()) {
-            stringBuffer.append(" --debug ").append(dockerModel.getDebugPort());
-        }
-        return stringBuffer.toString();
+    public DockerGenerator(DockerModel dockerModel) {
+        this.dockerModel = dockerModel;
     }
 
     /**
@@ -185,5 +148,46 @@ public class DockerGenerator {
         pushDone.await();
         handle.close();
         client.close();
+    }
+
+    /**
+     * Generate Dockerfile based on annotations using velocity template.
+     *
+     * @return Dockerfile content as a string
+     */
+    public String generate() {
+        String dockerBase = "# --------------------------------------------------------------------\n" +
+                "# Copyright (c) 2018, Ballerina (https://ballerina.io/) All Rights Reserved.\n" +
+                "#\n" +
+                "# Licensed under the Apache License, Version 2.0 (the \"License\");\n" +
+                "# you may not use this file except in compliance with the License.\n" +
+                "# You may obtain a copy of the License at\n" +
+                "#\n" +
+                "# http://www.apache.org/licenses/LICENSE-2.0\n" +
+                "#\n" +
+                "# Unless required by applicable law or agreed to in writing, software\n" +
+                "# distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
+                "# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
+                "# See the License for the specific language governing permissions and\n" +
+                "# limitations under the License.\n" +
+                "# -----------------------------------------------------------------------\n" +
+                "\n" +
+                "FROM " + dockerModel.getBaseImage() + "\n" +
+                "MAINTAINER ballerina Maintainers \"dev@ballerina.io\"\n" +
+                "\n" +
+                "COPY " + dockerModel.getBalxFileName() + " /home/ballerina \n\n";
+
+        StringBuilder stringBuffer = new StringBuilder(dockerBase);
+        if (dockerModel.isService()) {
+            stringBuffer.append("EXPOSE ");
+            dockerModel.getPorts().forEach(port -> stringBuffer.append(" ").append(port));
+            stringBuffer.append("\n\nCMD ballerina run -s ").append(dockerModel.getBalxFileName());
+        } else {
+            stringBuffer.append("CMD ballerina run ").append(dockerModel.getBalxFileName());
+        }
+        if (dockerModel.isDebugEnable()) {
+            stringBuffer.append(" --debug ").append(dockerModel.getDebugPort());
+        }
+        return stringBuffer.toString();
     }
 }

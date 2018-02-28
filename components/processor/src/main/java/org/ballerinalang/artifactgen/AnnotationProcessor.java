@@ -21,11 +21,13 @@ package org.ballerinalang.artifactgen;
 import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.artifactgen.generators.DockerGenerator;
 import org.ballerinalang.artifactgen.generators.KubernetesDeploymentGenerator;
+import org.ballerinalang.artifactgen.generators.KubernetesHPAGenerator;
 import org.ballerinalang.artifactgen.generators.KubernetesIngressGenerator;
 import org.ballerinalang.artifactgen.generators.KubernetesServiceGenerator;
 import org.ballerinalang.artifactgen.models.DeploymentModel;
 import org.ballerinalang.artifactgen.models.DockerModel;
 import org.ballerinalang.artifactgen.models.IngressModel;
+import org.ballerinalang.artifactgen.models.PodAutoscalerModel;
 import org.ballerinalang.artifactgen.models.ServiceModel;
 import org.ballerinalang.artifactgen.utils.ArtifactGenUtils;
 import org.ballerinalang.net.http.HttpConstants;
@@ -58,7 +60,7 @@ import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printSuccess;
 /**
  * Process Annotations and generate Artifacts.
  */
-class ArtifactGenerator {
+class AnnotationProcessor {
 
     private static final String KUBERNETES = "kubernetes";
     private static final String DOCKER = "docker";
@@ -66,6 +68,7 @@ class ArtifactGenerator {
     private static final String DEPLOYMENT_POSTFIX = "-deployment.yaml";
     private static final String SVC_POSTFIX = "-svc.yaml";
     private static final String INGRESS_POSTFIX = "-ingress.yaml";
+    private static final String AUTOSCALER_POSTFIX = "-hpa.yaml";
     private static final String SVC_TYPE_NODE_PORT = "NodePort";
     private static final String DOCKER_LATEST_TAG = ":latest";
     private static final String INGRESS_CLASS_NGINX = "nginx";
@@ -184,6 +187,8 @@ class ArtifactGenerator {
                 == null || deploymentAnnotationInfo.getAttributeValue(
                 ArtifactGenConstants.DEPLOYMENT_IMAGE_BUILD).getBooleanValue();
         deploymentModel.setImage(image);
+
+        //generate dockerfile and docker image
         DockerModel dockerModel = new DockerModel();
         String imageTag = image.substring(image.lastIndexOf(":") + 1, image.length());
         dockerModel.setBaseImage(baseImage);
@@ -200,6 +205,13 @@ class ArtifactGenerator {
                 .separator + DOCKER);
         printDebug(deploymentModel.toString());
         createDeploymentArtifacts(deploymentModel, outputDir, balxFilePath);
+
+        // Process HPA Annotation only if deployment annotation is present
+        AnnAttachmentInfo ingressAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
+                (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE, ArtifactGenConstants.HPA_ANNOTATION);
+        if (ingressAnnotationInfo != null) {
+            processHPAAnnotationForService(serviceInfo, deploymentModel, balxFilePath, outputDir);
+        }
         printKubernetesInstructions(outputDir);
     }
 
@@ -250,10 +262,9 @@ class ArtifactGenerator {
             serviceModel.setPort(9090);
             ports.add(9090);
         }
-
         printDebug(serviceModel.toString());
         try {
-            String svcContent = KubernetesServiceGenerator.generate(serviceModel);
+            String svcContent = new KubernetesServiceGenerator(serviceModel).generate();
             ArtifactGenUtils.writeToFile(svcContent, outputDir + File.separator + KUBERNETES + File
                     .separator + serviceInfo.getName() + SVC_POSTFIX);
             printSuccess("Service yaml generated.");
@@ -324,14 +335,71 @@ class ArtifactGenerator {
 
         printDebug(ingressModel.toString());
         try {
-            String svcContent = KubernetesIngressGenerator.generate(ingressModel);
-            ArtifactGenUtils.writeToFile(svcContent, outputDir + File.separator + KUBERNETES + File
+            String ingressContext = new KubernetesIngressGenerator(ingressModel).generate();
+            ArtifactGenUtils.writeToFile(ingressContext, outputDir + File.separator + KUBERNETES + File
                     .separator + serviceInfo.getName() + INGRESS_POSTFIX);
             printSuccess("Ingress yaml generated.");
         } catch (IOException e) {
             printError("Unable to write ingress content to " + outputDir);
         } catch (ArtifactGenerationException e) {
             printError("Unable to generate ingress content  " + e.getMessage());
+        }
+    }
+
+    /**
+     * Process HPA annotations for ballerina Service.
+     *
+     * @param serviceInfo  ServiceInfo Object
+     * @param balxFilePath ballerina file name
+     * @param outputDir    target output directory
+     */
+    private static void processHPAAnnotationForService(ServiceInfo serviceInfo, DeploymentModel deploymentModel, String
+            balxFilePath, String outputDir) {
+        AnnAttachmentInfo autoscalerAnnotationInfo = serviceInfo.getAnnotationAttachmentInfo
+                (ArtifactGenConstants.KUBERNETES_ANNOTATION_PACKAGE, ArtifactGenConstants.HPA_ANNOTATION);
+        PodAutoscalerModel podAutoscalerModel = new PodAutoscalerModel();
+
+        String name = autoscalerAnnotationInfo.getAttributeValue(ArtifactGenConstants.AUTOSCALER_NAME)
+                != null ?
+                autoscalerAnnotationInfo.getAttributeValue(ArtifactGenConstants.AUTOSCALER_NAME).getStringValue() :
+                serviceInfo.getName();
+
+        podAutoscalerModel.setName(name.toLowerCase(Locale.ENGLISH));
+        String labels = autoscalerAnnotationInfo.getAttributeValue(ArtifactGenConstants.AUTOSCALER_LABELS) != null ?
+                autoscalerAnnotationInfo.getAttributeValue(ArtifactGenConstants.AUTOSCALER_LABELS).getStringValue() :
+                null;
+        podAutoscalerModel.setLabels(getLabelMap(labels, ArtifactGenUtils.extractBalxName(balxFilePath)));
+
+        int cpuPercentage = autoscalerAnnotationInfo.getAttributeValue(ArtifactGenConstants.AUTOSCALER_CPU_PERCENTAGE)
+                != null ?
+                Math.toIntExact(autoscalerAnnotationInfo.
+                        getAttributeValue(ArtifactGenConstants.AUTOSCALER_CPU_PERCENTAGE).getIntValue()) : 50;
+        podAutoscalerModel.setCpuPercentage(cpuPercentage);
+
+        int minReplicas = autoscalerAnnotationInfo.getAttributeValue(ArtifactGenConstants.AUTOSCALER_MIN_REPLICAS)
+                != null ?
+                Math.toIntExact(autoscalerAnnotationInfo.getAttributeValue(ArtifactGenConstants.AUTOSCALER_MIN_REPLICAS)
+                        .getIntValue()) : deploymentModel.getReplicas();
+        podAutoscalerModel.setMinReplicas(minReplicas);
+
+        int maxReplicas = autoscalerAnnotationInfo.getAttributeValue(ArtifactGenConstants.AUTOSCALER_MAX_REPLICAS)
+                != null ?
+                Math.toIntExact(autoscalerAnnotationInfo.getAttributeValue(ArtifactGenConstants.AUTOSCALER_MAX_REPLICAS)
+                        .getIntValue()) : deploymentModel.getReplicas() + 1;
+        podAutoscalerModel.setMaxReplicas(maxReplicas);
+
+        podAutoscalerModel.setDeployment(deploymentModel.getName());
+
+        printDebug(podAutoscalerModel.toString());
+        try {
+            String hpaContent = new KubernetesHPAGenerator(podAutoscalerModel).generate();
+            ArtifactGenUtils.writeToFile(hpaContent, outputDir + File.separator + KUBERNETES + File
+                    .separator + serviceInfo.getName() + AUTOSCALER_POSTFIX);
+            printSuccess("Horizontal pod autoscaler yaml generated.");
+        } catch (IOException e) {
+            printError("Unable to write HPA content to " + outputDir);
+        } catch (ArtifactGenerationException e) {
+            printError("Unable to generate HPA content  " + e.getMessage());
         }
     }
 
@@ -448,7 +516,7 @@ class ArtifactGenerator {
     }
 
     private static void createDockerArtifacts(DockerModel dockerModel, String balxFilePath, String outputDir) {
-        String dockerContent = DockerGenerator.generate(dockerModel);
+        String dockerContent = new DockerGenerator(dockerModel).generate();
         try {
             ArtifactGenUtils.writeToFile(dockerContent, outputDir + File.separator + "Dockerfile");
             printSuccess("Dockerfile generated.");
@@ -473,7 +541,7 @@ class ArtifactGenerator {
     private static void createDeploymentArtifacts(DeploymentModel deploymentModel, String outputDir,
                                                   String balxFilePath) {
         try {
-            String deploymentContent = KubernetesDeploymentGenerator.generate(deploymentModel);
+            String deploymentContent = new KubernetesDeploymentGenerator(deploymentModel).generate();
             ArtifactGenUtils.writeToFile(deploymentContent, outputDir + File.separator + KUBERNETES + File
                     .separator + ArtifactGenUtils.extractBalxName(balxFilePath) + DEPLOYMENT_POSTFIX);
             printSuccess("Deployment yaml generated.");
@@ -487,9 +555,8 @@ class ArtifactGenerator {
     private static void printDockerInstructions(DockerModel dockerModel) {
         printInstruction("\nRun following command to start docker container: ");
         StringBuilder command = new StringBuilder("docker run -d ");
-        dockerModel.getPorts().forEach(port -> {
-            command.append("-p " + port + ":" + port + " ");
-        });
+        dockerModel.getPorts().forEach((Integer port) -> command.append("-p ").append(port).append(":").append(port)
+                .append(" "));
         command.append(dockerModel.getName());
         printInstruction(command.toString());
 

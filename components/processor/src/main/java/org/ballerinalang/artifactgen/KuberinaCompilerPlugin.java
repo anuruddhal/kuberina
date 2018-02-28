@@ -42,7 +42,7 @@ import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printWarn;
 /**
  * Compiler plugin to generate kubernetes artifacts.
  */
-public class KuberinaProcessor extends AbstractCompilerPlugin {
+public class KuberinaCompilerPlugin extends AbstractCompilerPlugin {
     @Override
     public void init(DiagnosticLog diagnosticLog) {
     }
@@ -88,7 +88,7 @@ public class KuberinaProcessor extends AbstractCompilerPlugin {
                         String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
                                 .extractBalxName(filePath)
                                 + File.separator;
-                        ArtifactGenerator.processSvcAnnotationForService(serviceInfo, filePath, targetPath);
+                        AnnotationProcessor.processSvcAnnotationForService(serviceInfo, filePath, targetPath);
                     }
                     if (dockerAnnotation != null) {
                         if (dockerCount < 1) {
@@ -105,14 +105,14 @@ public class KuberinaProcessor extends AbstractCompilerPlugin {
                     String targetPath = userDir + File.separator + "target" + File.separator + ArtifactGenUtils
                             .extractBalxName(filePath)
                             + File.separator;
-                    ArtifactGenerator.
+                    AnnotationProcessor.
                             processDeploymentAnnotationForService(deploymentAnnotatedService, filePath, targetPath);
                 }
                 if (dockerAnnotatedService != null) {
                     String targetPath = userDir + File.separator + "target" + File.separator + "docker" + File
                             .separator;
                     printDebug("Output Directory " + targetPath);
-                    ArtifactGenerator.
+                    AnnotationProcessor.
                             processDockerAnnotationForService(dockerAnnotatedService, filePath, targetPath);
                 }
             }

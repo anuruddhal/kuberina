@@ -31,27 +31,29 @@ import io.fabric8.kubernetes.client.internal.SerializationUtils;
 import org.ballerinalang.artifactgen.exceptions.ArtifactGenerationException;
 import org.ballerinalang.artifactgen.models.IngressModel;
 
-import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.ballerinalang.artifactgen.utils.ArtifactGenUtils.printError;
 
 
 /**
  * Generates kubernetes ingress from annotations.
  */
-public class KubernetesIngressGenerator {
-    private static final String INGRESS_CLASS = "kubernetes.io/ingress.class";
-    private static final String INGRESS_SSL_PASS_THROUGH = "nginx.ingress.kubernetes.io/ssl-passthrough";
-    private static final String INGRESS_REWRITE_TARGET = "nginx.ingress.kubernetes.io/rewrite-target";
-    private static final PrintStream out = System.out;
+public class KubernetesIngressGenerator implements ArtifactGenerator {
+    private IngressModel ingressModel;
+
+    public KubernetesIngressGenerator(IngressModel ingressModel) {
+        this.ingressModel = ingressModel;
+    }
 
     /**
      * Generate kubernetes ingress definition from annotation.
      *
-     * @param ingressModel {@link IngressModel} object
      * @return Generated kubernetes {@link Ingress} definition
+     * @throws ArtifactGenerationException If an error occurs while generating artifact.
      */
-    public static String generate(IngressModel ingressModel) throws ArtifactGenerationException {
+    public String generate() throws ArtifactGenerationException {
         //generate ingress backend
         IngressBackend ingressBackend = new IngressBackendBuilder()
                 .withServiceName(ingressModel.getServiceName())
@@ -65,7 +67,7 @@ public class KubernetesIngressGenerator {
                         .getPath()).build();
 
         //generate TLS
-        IngressTLS ingressTLS = null;
+        IngressTLS ingressTLS;
         if (ingressModel.isEnableTLS()) {
             ingressTLS = new IngressTLSBuilder()
                     .withHosts(ingressModel.getHostname())
@@ -76,10 +78,10 @@ public class KubernetesIngressGenerator {
 
         //generate annotationMap
         Map<String, String> annotationMap = new HashMap<>();
-        annotationMap.put(INGRESS_CLASS, ingressModel.getIngressClass());
-        annotationMap.put(INGRESS_SSL_PASS_THROUGH, String.valueOf(ingressModel.isEnableTLS()));
+        annotationMap.put("kubernetes.io/ingress.class", ingressModel.getIngressClass());
+        annotationMap.put("nginx.ingress.kubernetes.io/ssl-passthrough", String.valueOf(ingressModel.isEnableTLS()));
         if (ingressModel.getTargetPath() != null) {
-            annotationMap.put(INGRESS_REWRITE_TARGET, ingressModel.getTargetPath());
+            annotationMap.put("nginx.ingress.kubernetes.io/rewrite-target", ingressModel.getTargetPath());
         }
 
         //generate ingress
@@ -104,7 +106,7 @@ public class KubernetesIngressGenerator {
             ingressYAML = SerializationUtils.dumpWithoutRuntimeStateAsYaml(ingress);
         } catch (JsonProcessingException e) {
             String errorMessage = "Error while generating yaml file for ingress: " + ingressModel.getName();
-            out.println(errorMessage);
+            printError(errorMessage);
             throw new ArtifactGenerationException(errorMessage, e);
         }
         return ingressYAML;

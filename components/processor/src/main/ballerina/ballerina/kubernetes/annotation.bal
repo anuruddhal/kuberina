@@ -67,7 +67,7 @@ public annotation externalDeployment attach service, function {
 }
 
 @Description {value:"Kubernetes service configuration"}
-@Field {value:"name: Name of the Service"}
+@Field {value:"name: Name of the service"}
 @Field {value:"labels: Labels for service"}
 @Field {value:"serviceType: Service type of the service"}
 @Field {value:"port: Service port"}
@@ -79,8 +79,8 @@ public annotation externalSvc attach service {
 }
 
 @Description {value:"Kubernetes ingress configuration"}
-@Field {value:"name: Name of the Service"}
-@Field {value:"labels: Labels for service"}
+@Field {value:"name: Name of the ingress"}
+@Field {value:"labels: Labels for ingress"}
 @Field {value:"hostname: Host name of the ingress"}
 @Field {value:"path: Resource path"}
 @Field {value:"targetPath: Target path for url rewrite"}
@@ -94,4 +94,18 @@ public annotation ingress attach service {
     string targetPath;
     string ingressClass;
     boolean enableTLS;
+}
+
+@Description {value:"Kubernetes Horizontal Pod Autoscaler configuration"}
+@Field {value:"name: Name of the Autoscaler"}
+@Field {value:"labels: Labels for Autoscaler"}
+@Field {value:"minReplicas: Minimum number of replicas"}
+@Field {value:"maxReplicas: Maximum number of replicas"}
+@Field {value:"cpuPercentage: CPU percentage to start scaling"}
+public annotation hpa attach service {
+    string name;
+    string labels;
+    int minReplicas;
+    int maxReplicas;
+    int cpuPercentage;
 }
