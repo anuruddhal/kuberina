@@ -56,7 +56,7 @@ public class KubernetesHPAGenerator implements ArtifactGenerator {
                 .withMaxReplicas(podAutoscalerModel.getMaxReplicas())
                 .withMinReplicas(podAutoscalerModel.getMinReplicas())
                 .withTargetCPUUtilizationPercentage(podAutoscalerModel.getCpuPercentage())
-                .withNewScaleTargetRef("v1/beta1", "Deployment", podAutoscalerModel.getDeployment())
+                .withNewScaleTargetRef("extensions/v1beta1", "Deployment", podAutoscalerModel.getDeployment())
                 .endSpec()
                 .build();
         try {
